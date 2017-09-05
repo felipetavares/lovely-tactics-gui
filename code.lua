@@ -91,7 +91,7 @@ end
 local function createTilesetWindow()
 	local window = gui.Window:new(true, "TILESET")
 	
-	window.w = 200
+	window.w = gui.border*20
 
 	-- Containers
 	local c1, c2, c3, c4

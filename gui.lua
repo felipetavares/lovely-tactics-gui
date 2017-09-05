@@ -312,6 +312,10 @@ function TextBox:keyUp (key)
 	if key == "backspace" then
 		if utf8.len(self.text) == 1 then
 			self.text = ""
+			self.cursor = 0
+		elseif utf8.len(self.text) == 0 then
+			self.text = ""
+			self.cursor = 0
 		else
 			self.text = utf8.sub(self.text, 0, utf8.len(self.text)-1)
 			self.cursor = self.cursor-1
