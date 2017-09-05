@@ -59,30 +59,92 @@ local function createAboutWindow()
 	gui.addWindow(window)
 end
 
-local function createToolbarWindow()
-	local window = gui.Window:new(true, "TOOLBAR")
+local function createMapsWindow()
+	local window = gui.Window:new(true, "MAPS")
 	
-	window.w = 200
+	window.w = gui.border*20
+	window.h = gui.border*15
+
+	-- Containers
+	local c1, c2, c3
+	-- Scroll bars
+	local s1
+	-- Buttons
+	local b1
+
+	c1 = gui.VContainer:new()
+	c1:begin()
+	c2 = gui.HContainer:new()
+	c2:begin(true)
+	c3 = gui.VContainer:new()
+	c3:begin(false, true)
+
+	b1 = gui.Button:new("Map00.json")
+	b1:begin()
+	b1.fixedH = 36
+
+	c3:addWidget(b1)
+
+	s1 = gui.ScrollBar:new()
+	s1:begin("vertical")
+	s1:scrollContainer(c3)
+	s1.fixedW = 24
+
+	c2:addWidget(c3)
+	c2:addWidget(s1)
+
+	c1:addWidget(c2)
+	
+	window:setRootContainer(c1)
+
+	gui.addWindow(window)
+end
+
+local function createMenuWindow()
+	local window = gui.Window:new(true, "MENU")
+	
+	window.w = gui.border*12
+	window.h = gui.border*20
 
 	-- Containers
 	local c1
 	-- Labels
 	local w1
 	-- Buttons
-	local b1
+	local b1, b2, b3, b4, b5
 
 	c1 = gui.VContainer:new()
 	c1:begin()
 
-	w1 = gui.Widget:new("TOOL LIST")
-	b1 = gui.Button:new("About")
+	w1 = gui.Widget:new("")
+	b1 = gui.Button:new("About...")
 	b1:begin(createAboutWindow)
 	b1.userData = window
 	b1.fixedH = 36
 
-	c1:addWidget(b1)
+	b2 = gui.Button:new("Save...")
+	b2:begin()
+	b2.fixedH = 36
+
+	b3 = gui.Button:new("Save as...")
+	b3:begin()
+	b3.fixedH = 36
+
+	b4 = gui.Button:new("Load...")
+	b4:begin()
+	b4.fixedH = 36
+
+	b5 = gui.Button:new("New...")
+	b5:begin()
+	b5.fixedH = 36
+
+	c1:addWidget(b5)
+	c1:addWidget(b2)
+	c1:addWidget(b3)
+	c1:addWidget(b4)
 	c1:addWidget(w1)
-	
+	c1:addWidget(b1)
+
 	window:setRootContainer(c1)
 
 	gui.addWindow(window)
@@ -120,13 +182,14 @@ local function loadTileList()
 	return tile_list
 end
 
-local function createTilesetWindow()
-	local window = gui.Window:new(true, "TILESET")
+local function createTilesWindow()
+	local window = gui.Window:new(true, "TILES")
 	
 	window.w = gui.border*20
+	window.h = gui.border*40
 
 	-- Containers
-	local c1, c2, c3, c4
+	local c1, c2, c3, c4, c5
 	-- Labels
 	-- Scrollbar
 	local s1
@@ -144,6 +207,16 @@ local function createTilesetWindow()
 	c4 = gui.HContainer:new()
 	c4:begin(true)
 	c4.fixedH = 36
+	c5 = gui.HContainer:new()
+	c5:begin(true)
+	c5.fixedH = 36
+
+	for i=1,4 do
+		local tab = gui.Button:new("#"..tostring(i))
+		tab:begin()
+
+		c5:addWidget(tab)
+	end
 
 	local tile_list = loadTileList() 
 	local row_size = 3
@@ -186,6 +259,7 @@ local function createTilesetWindow()
 	c2:addWidget(c3)
 	c2:addWidget(s1)
 
+	c1:addWidget(c5)
 	c1:addWidget(c2)
 	c1:addWidget(c4)
 
@@ -198,8 +272,9 @@ local function begin()
 	-- Set a nice font
 	love.graphics.setFont(love.graphics.newFont("gui/FogSans.otf", 14))
 
-	createTilesetWindow()
-	createToolbarWindow()
+	createTilesWindow()
+	createMapsWindow()
+	createMenuWindow()
 end
 
 local function update()

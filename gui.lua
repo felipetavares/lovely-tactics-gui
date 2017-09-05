@@ -355,7 +355,7 @@ function TextBox:render ()
 		self.bg_dep:draw(self.x+1, self.y+1, self.w-2, self.h-2)
 	end
 
-	love.graphics.print (self.text, self.x+Module.border/2+1, self.y+self.h/2-love.graphics.getFont():getHeight("")/2)
+	love.graphics.print (self.text, self.x+Module.border/2+2, self.y+self.h/2-love.graphics.getFont():getHeight("")/2)
 
 	local cursorPosition
 
@@ -412,13 +412,15 @@ function ScrollBar:move (x, y)
 			local handle_size = self:getHandleSize()
 			local handle_pos = self:getHandlePos()
 
-			local delta = (y-self.click_position.y)/(self.h-handle_size)
-			self.position = self.click_value+delta	
-			
-			if self.position < 0 then
-				self.position = 0
-			elseif self.position > 1 then
-				self.position = 1
+			if handle_size < self.h then
+				local delta = (y-self.click_position.y)/(self.h-handle_size)
+				self.position = self.click_value+delta	
+				
+				if self.position < 0 then
+					self.position = 0
+				elseif self.position > 1 then
+					self.position = 1
+				end
 			end
 		end
 
@@ -661,6 +663,8 @@ end
 function VContainer:resize ()
 	local wid
 
+	local border = 0
+
 	if not self.noborder then
 		border = Module.border
 	end
@@ -831,10 +835,18 @@ function Container:update ()
 		self.fullH = self.h
 	end
 
-	-- Less than 50 pixels per thing
-	if self.fullH/#self.widgets < 50 then
-		-- Put a size of 50 pixels per thing
-		self.fullH = #self.widgets*50
+	-- Less than 36 pixels per thing
+	if self.fullH/#self.widgets < 36 then
+		-- Calculate the size for everything
+		self.fullH = 0
+
+		for wid=1, #self.widgets do
+			if self.widgets[wid].fixedH then
+				self.fullH = self.fullH + self.widgets[wid].fixedH
+			else
+				self.fullH = self.fullH + 36
+			end
+		end
 	end
 
 	if self.invalid then
