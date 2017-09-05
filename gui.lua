@@ -387,6 +387,14 @@ function ScrollBar:begin(type)
 	end
 end
 
+function ScrollBar:getHandleSize()
+	return math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
+end
+
+function ScrollBar:getHandlePos()
+	return self.y+(self.h-self:getHandleSize())*self.position
+end
+
 function ScrollBar:move (x, y)
 	if self.justclicked == true then
 		self.justclicked = false
@@ -401,10 +409,10 @@ function ScrollBar:move (x, y)
 		if self.type == "horizontal" then
 			self.position = (x-self.x)/self.w
 		else
-			local vis = math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
-			local handle_pos = self.y+(self.h-vis)*self.position
+			local handle_size = self:getHandleSize()
+			local handle_pos = self:getHandlePos()
 
-			local delta = (y-self.click_position.y)/(self.h-vis)
+			local delta = (y-self.click_position.y)/(self.h-handle_size)
 			self.position = self.click_value+delta	
 			
 			if self.position < 0 then
@@ -423,11 +431,11 @@ end
 
 function ScrollBar:down (button, x, y)
 	if button == 1 then
-		local vis = math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
-		local handle_pos = self.y+(self.h-vis)*self.position
+		local handle_size = self:getHandleSize()
+		local handle_pos = self:getHandlePos()
 
 
-		if y > handle_pos and y < handle_pos+vis then
+		if y > handle_pos and y < handle_pos+handle_size then
 			self.isclicked = true
 			self.justclicked = true
 		end
@@ -461,8 +469,8 @@ function ScrollBar:render ()
 	if self.type == "horizontal" then
 		-- TODO: Horizontal drawing code
 	else
-		local vis = math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
-		self.fg_scroll:draw(self.x+1, self.y+(self.h-vis)*self.position, self.w-2, vis)
+		local handle_size = self:getHandleSize()
+		self.fg_scroll:draw(self.x+1, self.y+(self.h-handle_size)*self.position, self.w-2, handle_size)
 	end
 	
 	iScissor:restore()
