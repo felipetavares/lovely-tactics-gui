@@ -119,19 +119,23 @@ local function createTilesetWindow()
 		"tiles/water.png",
 		"tiles/road.png"
 	}
+	local row_size = 3
+	local shared_info = {
+		focused = nil
+	}
+	
+	for i=0,#tile_list/row_size do
+		local row = gui.HContainer:new()
+		row:begin(true)
+		row.fixedH = 50
 
-	for i=0,#tile_list/3 do
-		local line = gui.HContainer:new()
-		line:begin(true)
-		line.fixedH = 50
-
-		for j=1,3 do
-			local tmp = gui.Button:new()
-			tmp:begin(false, tile_list[i*3+j], {x = 0, y = 155, w = 36, h = 22})
-			line:addWidget(tmp)
+		for j=1,row_size do
+			local tmp = gui.TileInfo:new()
+			tmp:begin(false, tile_list[i*row_size+j], {x = 0, y = 155, w = 36, h = 22}, shared_info)
+			row:addWidget(tmp)
 		end
 
-		c3:addWidget(line)
+		c3:addWidget(row)
 	end
 
 	s1 = gui.ScrollBar:new()
