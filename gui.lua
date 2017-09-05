@@ -237,7 +237,7 @@ end
 function Widget:mouseDown (x, y, button)
 	if self:isInside(x, y) then
 		self:select()
-		self:down(button)
+		self:down(button, x, y)
 	end
 end
 
@@ -388,11 +388,30 @@ function ScrollBar:begin(type)
 end
 
 function ScrollBar:move (x, y)
+	if self.justclicked == true then
+		self.justclicked = false
+
+		self.click_position = {
+			x = x, y = y
+		}
+		self.click_value = self.position
+	end
+
 	if self.isclicked == true then
 		if self.type == "horizontal" then
 			self.position = (x-self.x)/self.w
 		else
-			self.position = (y-self.y)/self.h			
+			local vis = math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
+			local handle_pos = self.y+(self.h-vis)*self.position
+
+			local delta = (y-self.click_position.y)/(self.h-vis)
+			self.position = self.click_value+delta	
+			
+			if self.position < 0 then
+				self.position = 0
+			elseif self.position > 1 then
+				self.position = 1
+			end
 		end
 
 		if self.linkedContainer then
@@ -402,15 +421,23 @@ function ScrollBar:move (x, y)
 	end
 end
 
-function ScrollBar:down (button)
+function ScrollBar:down (button, x, y)
 	if button == 1 then
-		self.isclicked = true
+		local vis = math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
+		local handle_pos = self.y+(self.h-vis)*self.position
+
+
+		if y > handle_pos and y < handle_pos+vis then
+			self.isclicked = true
+			self.justclicked = true
+		end
 	end
 end
 
 function ScrollBar:up (button)
 	if button == 1 then
 		self.isclicked = false
+		self.justclicked = false
 	end
 end
 
@@ -434,7 +461,8 @@ function ScrollBar:render ()
 	if self.type == "horizontal" then
 		-- TODO: Horizontal drawing code
 	else
-		self.fg_scroll:draw(self.x+1, self.y+1+(self.h-24)*self.position, self.w-2, 24)
+		local vis = math.min((self.linkedContainer.h/self.linkedContainer.fullH)*self.h, self.h)
+		self.fg_scroll:draw(self.x+1, self.y+(self.h-vis)*self.position, self.w-2, vis)
 	end
 	
 	iScissor:restore()

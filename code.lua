@@ -88,6 +88,38 @@ local function createToolbarWindow()
 	gui.addWindow(window)
 end
 
+local function loadTileList()
+	local images = {
+		"tiles/plain.png",
+		"tiles/sand.png",
+		"tiles/water.png",
+		"tiles/road.png"
+	}
+	local tile_list = {}
+
+	-- Default tile sizes
+	local tw = 36
+	local th = 22
+
+	for i, img_path in pairs(images) do
+		local w, h = love.graphics.newImage(img_path):getDimensions()
+		local y = 0, x
+
+		while y < h do
+			x = 0
+			while x < w do
+				table.insert(tile_list, {path = img_path, quad = {x = x, y = y, w = tw, h = th}})
+
+				x = x+tw
+			end
+
+			y = y+th
+		end		
+	end
+
+	return tile_list
+end
+
 local function createTilesetWindow()
 	local window = gui.Window:new(true, "TILESET")
 	
@@ -113,12 +145,7 @@ local function createTilesetWindow()
 	c4:begin(true)
 	c4.fixedH = 36
 
-	local tile_list = {
-		"tiles/plain.png",
-		"tiles/sand.png",
-		"tiles/water.png",
-		"tiles/road.png"
-	}
+	local tile_list = loadTileList() 
 	local row_size = 3
 	local shared_info = {
 		focused = nil
@@ -130,9 +157,13 @@ local function createTilesetWindow()
 		row.fixedH = 50
 
 		for j=1,row_size do
-			local tmp = gui.TileInfo:new()
-			tmp:begin(false, tile_list[i*row_size+j], {x = 0, y = 155, w = 36, h = 22}, shared_info)
-			row:addWidget(tmp)
+			local tile = tile_list[i*row_size+j]
+			
+			if tile then
+				local tmp = gui.TileInfo:new()
+				tmp:begin(false, tile.path, tile.quad, shared_info)
+				row:addWidget(tmp)
+			end
 		end
 
 		c3:addWidget(row)
