@@ -152,10 +152,7 @@ end
 
 local function loadTileList()
 	local images = {
-		"tiles/plain.png",
-		"tiles/sand.png",
-		"tiles/water.png",
-		"tiles/road.png"
+		"images/Terrain/HexV.png",
 	}
 	local tile_list = {}
 
@@ -268,9 +265,18 @@ local function createTilesWindow()
 	gui.addWindow(window)
 end
 
+require("lovely-tactics-hex/scripts/core/base/globals")
+
 local function begin()
 	-- Set a nice font
 	love.graphics.setFont(love.graphics.newFont("gui/FogSans.otf", 14))
+
+	Config.screen.nativeWidth = love.graphics:getWidth()
+	Config.screen.nativeHeight = love.graphics:getHeight()
+
+	ScreenManager:init()
+	SaveManager:newSave()
+	FieldManager:loadTransition(SaveManager.current.playerTransition)
 
 	createTilesWindow()
 	createMapsWindow()
@@ -289,12 +295,16 @@ local function update()
 
 	-- GUI update
 	gui.update()
+
+	-- Update the map
+	FieldManager:update()
 end
 
 local function render()
 	love.graphics.setScissor(0,0,love.graphics:getWidth(),love.graphics:getHeight())
 	love.graphics.clear(128, 60, 100, 255)
 
+	ScreenManager:draw()	
 	gui.render()
 end
 
