@@ -269,7 +269,7 @@ function Widget:render ()
 	love.graphics.setColor(255, 255, 255, 255)
 	self.bg:draw(self.x+1, self.y+1, self.w-2, self.h-2)
 
-	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2-6)
+	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2-10)
 
 	iScissor:restore()
 end
@@ -351,17 +351,17 @@ function TextBox:render ()
 		self.bg_dep:draw(self.x+1, self.y+1, self.w-2, self.h-2)
 	end
 
-	love.graphics.print (self.text, self.x+Module.border/2, self.y+self.h/2-love.graphics.getFont():getHeight("")/2)
+	love.graphics.print (self.text, self.x+Module.border/2+1, self.y+self.h/2-love.graphics.getFont():getHeight("")/2)
 
 	local cursorPosition
 
 	if self.cursor == 0 then
-		cursorPosition = Module.border/2
+		cursorPosition = Module.border/2+2
 	else
-		cursorPosition = Module.border/2+love.graphics.getFont():getWidth(utf8.sub(self.text,0,self.cursor))
+		cursorPosition = Module.border/2+2+love.graphics.getFont():getWidth(utf8.sub(self.text,0,self.cursor))
 	end
 
-	love.graphics.rectangle ("fill", self.x+cursorPosition, self.y+self.h/4,
+	love.graphics.rectangle ("fill", self.x+cursorPosition, self.y+self.h/4-1,
 									 2, self.h-self.h/2)
 
 	iScissor:restore()
@@ -374,6 +374,9 @@ function ScrollBar:begin(type)
 	self.position = 0
 	self.isclicked = false
 	self.type = type
+
+	self.bg_scroll = Skin:new("gui/scrollbar-bg.png")
+	self.fg_scroll = Skin:new("gui/scrollbar-fg.png")
 
 	if not self.type then
 		self.type = "horizontal"
@@ -421,29 +424,15 @@ function ScrollBar:render ()
 	iScissor:save()
 	iScissor:combineScissor (self.x, self.y, self.w, self.h)
 
-	love.graphics.setColor (self.color.r:get(), self.color.g:get(), self.color.b:get(), 255)
-	love.graphics.rectangle ("fill", self.x+1, self.y+1,
-									 self.w-2, self.h-2)
+	love.graphics.setColor(255, 255, 255, 255)
+	self.bg_scroll:draw(self.x+1, self.y+1, self.w-2, self.h-2)
 
 	if self.type == "horizontal" then
-		love.graphics.setColor (255, 0, 0, 255)
-		love.graphics.rectangle ("fill", self.x, self.y,
-										 self.w*self.position, self.h)
+		-- TODO: Horizontal drawing code
 	else
-		love.graphics.setColor (255, 0, 0, 255)
-		love.graphics.rectangle ("fill", self.x, self.y,
-										 self.w, self.h*self.position)		
+		self.fg_scroll:draw(self.x+1, self.y+1+(self.h-24)*self.position, self.w-2, 24)
 	end
 	
-	love.graphics.setColor (255, 255, 255, 255)
-	love.graphics.print (self.name, self.x, self.y+self.h/2-8)
-
-	if self.focused then
-		love.graphics.setColor (255, 0, 0, 255)
-		love.graphics.rectangle ("line", self.x, self.y,
-											 self.w, self.h)
-	end
-
 	iScissor:restore()
 end
 Module.ScrollBar = ScrollBar
@@ -486,8 +475,13 @@ Module.CheckBox = CheckBox
 
 local Button = Widget:new()
 
-function Button:begin(callback)
+function Button:begin(callback, image_path, quad)
 	self.callback = callback
+
+	if image_path and quad then
+		self.image = love.graphics.newImage(image_path)
+		self.quad = love.graphics.newQuad(quad.x, quad.y, quad.w, quad.h, self.image:getDimensions())
+	end
 end
 
 function Button:down()
@@ -520,7 +514,13 @@ function Button:render ()
 		self.bg_bt:draw(self.x+1, self.y+1, self.w-2, self.h-2)
 	end
 
-	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2-6)
+	if self.image and self.quad then
+		-- Viewport of the quad
+		local _, _, w, h = self.quad:getViewport()
+		love.graphics.draw(self.image, self.quad, self.x+(self.w-w)/2, self.y+(self.h-h)/2)
+	end
+
+	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2-10)
 
 
 	iScissor:restore()
@@ -537,12 +537,18 @@ local HContainer = Container:new()
 function HContainer:resize ()
 	local wid
 
-	local pX = self.x+self.offX+Module.border/2
-	local pY = self.y+self.offY+Module.border/2
-	local pW = self.w-Module.border
-	local pH = self.h-Module.border
+	local border = 0
 
-	local unfixedW = self.w-Module.border
+	if not self.noborder then
+		border = Module.border
+	end
+
+	local pX = self.x+self.offX+border/2
+	local pY = self.y+self.offY+border/2
+	local pW = self.w-border
+	local pH = self.h-border
+
+	local unfixedW = self.w-border
 	local unfixedN = #self.widgets
 
 	for wid=1, #self.widgets do
@@ -574,12 +580,16 @@ end
 function VContainer:resize ()
 	local wid
 
-	local pX = self.x+self.offX+Module.border/2
-	local pY = self.y+self.offY+Module.border/2
-	local pW = self.w-Module.border
-	local pH = self.h-Module.border
+	if not self.noborder then
+		border = Module.border
+	end
 
-	local unfixedH = self.fullH-Module.border
+	local pX = self.x+self.offX+border/2
+	local pY = self.y+self.offY+border/2-2
+	local pW = self.w-border
+	local pH = self.h-border
+
+	local unfixedH = self.fullH-border
 	local unfixedN = #self.widgets
 
 	for wid=1, #self.widgets do
@@ -607,9 +617,12 @@ function VContainer:resize ()
 	self.invalid = false
 end
 
-function Container:begin ()
+function Container:begin (noborder, renderbg)
 	self.widgets = {}
 	self.invertWidgets = {}
+
+	self.noborder = noborder
+	self.renderbg = renderbg
 
 	self.offX = 0
 	self.offY = 0
@@ -691,6 +704,9 @@ function Container:render ()
 	for wid=1, #self.widgets do
 		iScissor:save()
 		iScissor:combineScissor (self.x, self.y, self.w, self.h)
+			if self.renderbg then
+				self.bg:draw(self.x, self.y, self.w, self.h)
+			end
 			self.widgets[wid]:render()
 		iScissor:restore()
 	end
@@ -861,7 +877,7 @@ function Window:render ()
 	love.graphics.setColor (255, 255, 255, 255)
 	self.bg:draw(self.x, self.y, self.w, self.h)
 
-	love.graphics.print(self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+Module.border/2)
+	love.graphics.print(self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+Module.border/2-3)
 
 	self.rootContainer:render()
 end
