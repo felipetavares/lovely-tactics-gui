@@ -1,4 +1,5 @@
 local Skin = require("ui/base/Skin")
+local GUIConf = require("ui/base/GUIConf")
 local Widget = require("ui/widgets/Widget")
 
 local ScrollBar = Widget:new()
@@ -54,7 +55,7 @@ function ScrollBar:move (x, y)
 		end
 
 		if self.linkedContainer then
-			self.linkedContainer.offY = -self.position*(self.linkedContainer.fullH-self.linkedContainer.h)
+			self.linkedContainer.offY = -self.position*(self.linkedContainer.fullH-self.linkedContainer.h+GUIConf.border)
 			self.linkedContainer:invalidate()
 		end
 	end

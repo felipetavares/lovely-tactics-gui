@@ -3,13 +3,14 @@ local Skin = require("ui/base/Skin")
 local Widget = {
 }
 
-function Widget:new (name)
+function Widget:new (name, noBg)
 	local o = {
 		x = 0, y = 0, w = 0, h = 0,
 		container = nil,
 		invalid = true,
 		mouseInside = false,
 		bg = Skin:new("gui_images/widget.png"),
+        renderBg = not noBg,
 		name = ""
 	}
 	setmetatable (o, {__index=self})
@@ -110,7 +111,10 @@ function Widget:render ()
 	iScissor:combineScissor (self.x, self.y, self.w, self.h)
 
 	love.graphics.setColor(255, 255, 255, 255)
-	self.bg:draw(self.x+1, self.y+1, self.w-2, self.h-2)
+
+    if self.renderBg == true then
+      self.bg:draw(self.x+1, self.y+1, self.w-2, self.h-2)
+    end
 
 	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2-10)
 

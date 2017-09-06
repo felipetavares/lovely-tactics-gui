@@ -2,6 +2,7 @@ local AboutWindow = require("editor/ui/AboutWindow")
 local TilesWindow = require("editor/ui/TilesWindow")
 local FieldsWindow = require("editor/ui/FieldsWindow")
 local MenuWindow = require("editor/ui/MenuWindow")
+local FileBrowserWindow = require("editor/ui/FileBrowserWindow")
 
 local CameraMovement = require("editor/base/CameraMovement")
 
@@ -18,6 +19,9 @@ function Editor:begin()
   tiles:begin()
   local fields = FieldsWindow:new()
   fields:begin()
+
+  local files = FileBrowserWindow:new()
+  files:begin("")
 end
 
 function Editor:mouseMove(x, y, mouseOverUI)

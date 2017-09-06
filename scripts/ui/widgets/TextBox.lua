@@ -80,16 +80,18 @@ function TextBox:render ()
 
 	love.graphics.print (self.text, self.x+GUIConf.border/2+2, self.y+self.h/2-love.graphics.getFont():getHeight("")/2)
 
-	local cursorPosition
+    if self.focused then
+      local cursorPosition
 
-	if self.cursor == 0 then
-		cursorPosition = GUIConf.border/2+2
-	else
-		cursorPosition = GUIConf.border/2+2+love.graphics.getFont():getWidth(utf8.sub(self.text,0,self.cursor))
-	end
+      if self.cursor == 0 then
+          cursorPosition = GUIConf.border/2+2
+      else
+          cursorPosition = GUIConf.border/2+2+love.graphics.getFont():getWidth(utf8.sub(self.text,0,self.cursor))
+      end
 
-	love.graphics.rectangle ("fill", self.x+cursorPosition, self.y+self.h/4-1,
-									 2, self.h-self.h/2)
+      love.graphics.rectangle ("fill", self.x+cursorPosition, self.y+self.h/4-1,
+                                       2, self.h-self.h/2)
+    end
 
 	iScissor:restore()
 end

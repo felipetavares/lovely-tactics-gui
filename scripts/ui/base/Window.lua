@@ -4,6 +4,11 @@ local Skin = require("ui/base/Skin")
 local Window = {
 }
 
+function Window:center()
+  self.x = (love.graphics:getWidth()-self.w)/2
+  self.y = (love.graphics:getHeight()-self.h)/2
+end
+
 function Window:onBar (x, y)
 	if x >= self.x and x <= self.x+self.w and
 	   y >= self.y and y <= self.y+24 then
