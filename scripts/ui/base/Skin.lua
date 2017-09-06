@@ -1,11 +1,7 @@
---[=[
-A gui_skin is a (usually) 12x12 image divided in 9 cells (3x3)
-that can be used to draw gui elements	
-]=]--
+local Skin = {
+}
 
-local Module = {}
-
-function Module:new(image_path)
+function Skin:new(image_path)
 	local image = love.graphics.newImage(image_path)
 	local img_w, img_h = image:getDimensions()
 	local cell_w = img_w/3
@@ -38,15 +34,16 @@ function Module:new(image_path)
 		-- Center
 		q_c = love.graphics.newQuad(cell_w, cell_h, cell_w, cell_h, img_w, img_h),
 	}
+
 	setmetatable(o, {__index=self})
 
 	return o
 end
 
 -- Draws a skin at a given position in a given size
-function Module:draw(x, y, w, h)
+function Skin:draw(x, y, w, h)
 	-- Scales for the parts that stretch
-	local scale_w = (w-self.cell_w*2)/self.cell_w 
+	local scale_w = (w-self.cell_w*2)/self.cell_w
 	local scale_h = (h-self.cell_h*2)/self.cell_h
 
 	-- Top
@@ -63,4 +60,4 @@ function Module:draw(x, y, w, h)
 	love.graphics.draw(self.image, self.q_bc, x+self.cell_w, y+h-self.cell_h, 0, scale_w, 1)
 end
 
-return Module
+return Skin
