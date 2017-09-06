@@ -13,6 +13,11 @@ function love.mousepressed(x, y, button)
 	}
 end
 
+function love.resize(w, h)
+	ScreenManager.width = w
+	ScreenManager.height = h
+end
+
 function love.mousereleased(x, y, button)
 	gui.mouseUp(x, y, button)
 end
