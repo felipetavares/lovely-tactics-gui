@@ -1,7 +1,16 @@
 local Module = {}
 
+local initClickPosition = nil
+
 function love.mousepressed(x, y, button)
 	gui.mouseDown(x, y, button)
+
+	local wx, wy = FieldManager.renderer:screen2World(love.graphics:getWidth(), love.graphics:getHeight())
+
+	initClickPosition = {
+		x = x, y = y,
+		wx = wx, wy = wy,
+	}
 end
 
 function love.mousereleased(x, y, button)
@@ -59,8 +68,14 @@ local function createAboutWindow()
 	gui.addWindow(window)
 end
 
-local function createMapsWindow()
-	local window = gui.Window:new(true, "MAPS")
+local function onLoadField(data)
+	local fieldID = data.field
+
+	FieldManager:loadField(fieldID)
+end
+
+local function createFieldsWindow()
+	local window = gui.Window:new(true, "FIELDS")
 	
 	window.w = gui.border*20
 	window.h = gui.border*15
@@ -70,7 +85,7 @@ local function createMapsWindow()
 	-- Scroll bars
 	local s1
 	-- Buttons
-	local b1
+	local b1, b2
 
 	c1 = gui.VContainer:new()
 	c1:begin()
@@ -79,11 +94,18 @@ local function createMapsWindow()
 	c3 = gui.VContainer:new()
 	c3:begin(false, true)
 
-	b1 = gui.Button:new("Map00.json")
-	b1:begin()
+	b1 = gui.Button:new("0")
+	b1:begin(onLoadField)
 	b1.fixedH = 36
+	b1.userData = {field = 0}
+
+	b2 = gui.Button:new("1")
+	b2:begin(onLoadField)
+	b2.fixedH = 36
+	b2.userData = {field = 1}
 
 	c3:addWidget(b1)
+	c3:addWidget(b2)
 
 	s1 = gui.ScrollBar:new()
 	s1:begin("vertical")
@@ -275,11 +297,10 @@ local function begin()
 	Config.screen.nativeHeight = love.graphics:getHeight()
 
 	ScreenManager:init()
-	SaveManager:newSave()
-	FieldManager:loadTransition(SaveManager.current.playerTransition)
+	FieldManager:loadField(1)
 
 	createTilesWindow()
-	createMapsWindow()
+	createFieldsWindow()
 	createMenuWindow()
 end
 
@@ -288,10 +309,22 @@ local function update()
 
 	x = love.mouse.getX()
 	y = love.mouse.getY()
-
+	w = love.graphics:getWidth()
+	h = love.graphics:getHeight()
+	
 	-- Fake events for mousemove
 	-- since Löve2d don't provides one
-	gui.mouseMove(love.mouse.getX(), love.mouse.getY())
+	if not gui.mouseMove(x, y) then
+		if love.mouse.isDown(1) then
+			-- Movement in world space
+			local ix, iy = FieldManager.renderer:screen2World(initClickPosition.x, initClickPosition.y)
+			local fx, fy = FieldManager.renderer:screen2World(x, y)
+			local dx, dy = fx-ix, fy-iy
+
+			local wx, wy = initClickPosition.wx-dx, initClickPosition.wy-dy
+			FieldManager.renderer:moveTo(wx, wy)
+		end
+	end
 
 	-- GUI update
 	gui.update()

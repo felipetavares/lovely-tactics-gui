@@ -1067,9 +1067,11 @@ local function mouseMove (x, y)
 			--if windows[w] ~= focusedWindow then
 			--	gui.bringUp(w)
 			--end
-			break
+			return true
 		end
 	end
+
+	return false
 end
 Module.mouseMove = mouseMove
 
