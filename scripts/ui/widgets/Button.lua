@@ -1,3 +1,4 @@
+local GUIConf = require("ui/base/GUIConf")
 local Skin = require("ui/base/Skin")
 local Widget = require("ui/widgets/Widget")
 
@@ -51,7 +52,7 @@ function Button:render ()
 		love.graphics.draw(self.image, self.quad, self.x+(self.w-w)/2, self.y+(self.h-h)/2)
 	end
 
-	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2-10)
+	love.graphics.print (self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+self.h/2+GUIConf.textOffset)
 
 
 	iScissor:restore()

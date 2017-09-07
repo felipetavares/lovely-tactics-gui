@@ -1,13 +1,7 @@
 local GUIConf = require("ui/base/GUIConf")
-local FieldsWindow = GUI.Window:new(true, "FIELDS")
+local ToolsWindow = GUI.Window:new(true, "")
 
-function FieldsWindow.onLoadField(data)
-  FieldManager:loadField(data.field)
-end
-
-function FieldsWindow:begin()
-  self.fieldTree = JSON.load("data/fields/fieldTree").root
-
+function ToolsWindow:begin()
   self.w = GUIConf.border*20
   self.h = GUIConf.border*15
 
@@ -49,4 +43,4 @@ function FieldsWindow:begin()
   GUI.addWindow(self)
 end
 
-return FieldsWindow
+return ToolsWindow

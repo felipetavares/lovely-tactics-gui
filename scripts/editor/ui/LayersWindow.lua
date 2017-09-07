@@ -1,13 +1,11 @@
 local GUIConf = require("ui/base/GUIConf")
-local FieldsWindow = GUI.Window:new(true, "FIELDS")
+local LayersWindow = GUI.Window:new(true, "LAYERS")
 
-function FieldsWindow.onLoadField(data)
+function LayersWindow.onLoadField(data)
   FieldManager:loadField(data.field)
 end
 
-function FieldsWindow:begin()
-  self.fieldTree = JSON.load("data/fields/fieldTree").root
-
+function LayersWindow:begin()
   self.w = GUIConf.border*20
   self.h = GUIConf.border*15
 
@@ -16,6 +14,8 @@ function FieldsWindow:begin()
   -- Scroll bars
   local s1
 
+  local shared_info = {}
+
   c1 = GUI.VContainer:new()
   c1:begin()
   c2 = GUI.HContainer:new()
@@ -23,15 +23,17 @@ function FieldsWindow:begin()
   c3 = GUI.VContainer:new()
   c3:begin(false, true)
 
-  for i, fieldInfo in ipairs(self.fieldTree.children) do
-    local fieldButton
+  for i, _ in ipairs(FieldManager.currentField.terrainLayers[0]) do
+    local layerInfo
 
-    fieldButton = GUI.Button:new(fieldInfo.data.name)
-    fieldButton:begin(self.onLoadField)
-    fieldButton.fixedH = 36
-    fieldButton.userData = {field = fieldInfo.data.id}
+    layerInfo = GUI.LayerInfo:new(tostring(i))
+    layerInfo:begin(false, shared_info)
+    layerInfo.fixedH = 36
+    layerInfo.userData = {layer = i}
 
-    c3:addWidget(fieldButton)
+    layerInfo:click()
+
+    c3:addWidget(layerInfo)
   end
 
   s1 = GUI.ScrollBar:new()
@@ -49,4 +51,4 @@ function FieldsWindow:begin()
   GUI.addWindow(self)
 end
 
-return FieldsWindow
+return LayersWindow

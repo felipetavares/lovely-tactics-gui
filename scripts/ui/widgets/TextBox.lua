@@ -78,7 +78,7 @@ function TextBox:render ()
 		self.bg:draw(self.x+1, self.y+1, self.w-2, self.h-2)
 	end
 
-	love.graphics.print (self.text, self.x+GUIConf.border/2+2, self.y+self.h/2-love.graphics.getFont():getHeight("")/2)
+	love.graphics.print (self.text, self.x+GUIConf.border/2+2, self.y+self.h/2-love.graphics.getFont():getHeight("")/2-2)
 
     if self.focused then
       local cursorPosition

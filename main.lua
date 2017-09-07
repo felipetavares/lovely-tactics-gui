@@ -17,7 +17,7 @@ function love.load ()
   love.window.setTitle ("Lovely Tactics Hex")
 
   -- Set a nice font
-  love.graphics.setFont(love.graphics.newFont("fonts/FogSans.otf", 14))
+  love.graphics.setFont(love.graphics.newFont("fonts/FogSans.otf", 16))
 
   -- Hack the configuration values to make our resolution work with
   -- GloamingCat's map rendering
@@ -60,6 +60,8 @@ end
 function love.resize(w, h)
   ScreenManager.width = w
   ScreenManager.height = h
+  FieldManager.renderer:resizeCanvas()
+  Editor:resize(w, h)
 end
 
 function love.mousereleased(x, y, button)
@@ -70,9 +72,6 @@ end
 function love.keypressed(key, isrepeat)
   GUI.keyDown(key, isrepeat)
 end
-
-
-
 
 function love.keyreleased(key)
   GUI.keyUp(key)

@@ -121,7 +121,7 @@ function Window:render ()
 	love.graphics.setColor (255, 255, 255, 255)
 	self.bg:draw(self.x, self.y, self.w, self.h)
 
-	love.graphics.print(self.name, self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2, self.y+GUIConf.border/2-3)
+	love.graphics.print(self.name, math.round(self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2), math.round(self.y+GUIConf.border+GUIConf.textOffset+2))
 
 	self.rootContainer:render()
 end

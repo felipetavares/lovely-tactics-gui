@@ -3,7 +3,7 @@ local TilesWindow = GUI.Window:new(true, "TILES")
 
 function TilesWindow:loadTileList(query)
   local tile_list = {}
-  local tw, th = 36, 22
+  local tw, th = Config.grid.tileW, Config.grid.tileH
 
   for i=0,#Database.terrains do
     local terrain = Database.terrains[i]
@@ -19,7 +19,8 @@ function TilesWindow:loadTileList(query)
           w = tw,
           h = th
         },
-        animation = image
+        animation = image,
+        terrain = terrain
       })
     end
   end
@@ -107,7 +108,35 @@ function TilesWindow:previewAutotile(animation, previewContainer)
   previewContainer:invalidate()
 end
 
+function TilesWindow:tileInformation(data, container)
+  local terrain = data.terrain
+  local animationStatus = ""
+  local image = Database.animations[terrain.image]
+
+  if image.cols > 1 then
+    animationStatus = "animated"
+  else
+    animationStatus = "static"
+  end
+
+  local w1 = GUI.Widget:new(terrain.name, true)
+  w1.fixedH = 36
+
+  local w2 = GUI.Widget:new(animationStatus, true)
+  w2.fixedH = 36
+
+  container:addWidget(w1)
+  container:addWidget(w2)
+
+  container.fixedH = w1.fixedH+w2.fixedH+GUIConf.border/2
+  container:invalidate()
+end
+
 function TilesWindow.onSelectAutotile(data)
+  data.self.setBrushCallback(data.self.editor, {
+    tile = data.terrainID
+  })
+
   local preview = GUI.VContainer:new()
   preview:begin(false, true)
 
@@ -120,7 +149,8 @@ function TilesWindow.onSelectAutotile(data)
     end
   end
 
-  data.self:previewAutotile(data.animation, preview)
+  --data.self:previewAutotile(data.animation, preview)
+  data.self:tileInformation(data, preview)
 
   for i, widget in ipairs(data.container.widgets) do
     if widget == data.row then
@@ -157,10 +187,13 @@ function TilesWindow:showTileset(container, query)
 
       if tile then
         local tmp = GUI.TileInfo:new()
+        -- Use self.onSelectAutotile to turn autotile preview on
         tmp:begin(self.onSelectAutotile, tile.path, tile.quad, shared_info)
         tmp.userData = {
           self = self,
           animation = tile.animation,
+          terrainID = tile.terrain.id,
+          terrain = tile.terrain,
           row = row,
           container = container
         }
@@ -180,7 +213,10 @@ function TilesWindow.searchTileset(data)
   data.self:showTileset(data.container, data.text.text)
 end
 
-function TilesWindow:begin()
+function TilesWindow:begin(editor, setBrushCallback)
+  self.editor = editor
+  self.setBrushCallback = setBrushCallback
+
   self.currentTileset = 1
 
   self.w = GUIConf.border*20

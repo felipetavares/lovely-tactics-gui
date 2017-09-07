@@ -21,7 +21,10 @@ function CameraMovement:mouseDown(x, y, button)
 end
 
 function CameraMovement:mouseMove(x, y, overUI)
-  if love.mouse.isDown(1) and not overUI and initialClickPosition then
+  if love.mouse.isDown(1) and
+     not overUI and
+     initialClickPosition and
+     love.keyboard.isDown("lctrl", "rctrl") then
     local w = love.graphics:getWidth()
     local h = love.graphics:getHeight()
 
