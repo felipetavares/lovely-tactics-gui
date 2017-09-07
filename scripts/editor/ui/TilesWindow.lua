@@ -2,35 +2,57 @@ local GUIConf = require("ui/base/GUIConf")
 local TilesWindow = GUI.Window:new(true, "TILES")
 
 function TilesWindow:loadTileList()
-  local tilesets = {
-    {"images/Terrain/HexV.png"},
-    {"images/Terrain/Sand.png"},
-    {"images/Terrain/Water.png"},
-    {"images/Terrain/HexV old.png"}
-  }
-
-  local images = tilesets[self.currentTileset]
-
   local tile_list = {}
+  local tw, th = 36, 22
 
-  -- Default tile sizes
-  local tw = 36
-  local th = 22
+  for i=0,#Database.terrains do
+    local terrain = Database.terrains[i]
 
-  for i, img_path in pairs(images) do
-    local w, h = love.graphics.newImage(img_path):getDimensions()
-    local y = 0, x
+    local image = Database.animations[terrain.image]
 
-    while y < h do
-      x = 0
-      while x < w do
-        table.insert(tile_list, {path = img_path, quad = {x = x, y = y, w = tw, h = th}})
+    table.insert(tile_list, {
+      path = "images/"..image.path,
+      quad = {
+        x = image.x,
+        y = image.y,
+        w = tw,
+        h = th
+      },
+      animation = image
+    })
+  end
 
-        x = x+tw
-      end
+  return tile_list
+end
 
-      y = y+th
+function TilesWindow:loadPreviewAutotileList(animation)
+  local tile_list = {}
+  local tw, th = 36, 22
+
+  local image = animation
+
+  local x, y = image.x, image.y
+  local w, h = image.x+image.width, image.y+image.height
+
+  while y < h do
+    x = image.x
+
+    while x < w do
+      table.insert(tile_list, {
+        path = "images/"..image.path,
+        quad = {
+          x = x,
+          y = y,
+          w = tw,
+          h = th
+        },
+        animation = image
+      })
+
+      x = x+tw
     end
+
+    y = y+th
   end
 
   return tile_list
@@ -39,6 +61,79 @@ end
 function TilesWindow.switchToTileset(data)
   data.self.currentTileset = data.n
   data.self:showTileset(data.container)
+end
+
+function TilesWindow:previewAutotile(animation, previewContainer)
+  previewContainer.widgets = {}
+
+  local tile_list = self:loadPreviewAutotileList(animation)
+  local row_size = 3
+  local shared_info = {
+    focused = nil
+  }
+
+  local fullH = -GUIConf.border*4
+
+  for i=0,#tile_list/row_size do
+    local row = GUI.HContainer:new()
+    row:begin(true)
+    row.fixedH = GUIConf.border*5
+
+    fullH = fullH + row.fixedH
+
+    for j=1,row_size do
+      local tile = tile_list[i*row_size+j]
+
+      if tile then
+        local tmp = GUI.TileThumbnail:new()
+        tmp:begin(false, tile.path, tile.quad)
+        tmp.userData = {
+          self = self,
+          animation = tile.animation,
+          row = row,
+          previewContainer = previewContainer
+        }
+        row:addWidget(tmp)
+      end
+    end
+
+    previewContainer:addWidget(row)
+  end
+
+  previewContainer.fullH = nil
+  previewContainer.fixedH = fullH
+  previewContainer:invalidate()
+end
+
+function TilesWindow.onSelectAutotile(data)
+  local preview = GUI.VContainer:new()
+  preview:begin(false, true)
+
+  if data.self.currentPreview ~= nil then
+    for i, widget in ipairs(data.container.widgets) do
+      if widget == data.self.currentPreview.row then
+        table.remove(data.container.widgets, i)
+        break
+      end
+    end
+  end
+
+  data.self:previewAutotile(data.animation, preview)
+
+  for i, widget in ipairs(data.container.widgets) do
+    if widget == data.row then
+      data.container:addWidgetAt(preview, i+1)
+      break
+    end
+  end
+
+  data.self.currentPreview = {
+    container = data.container,
+    row = preview
+  }
+
+  data.container.fullH = nil
+  data.container:invalidate()
 end
 
 function TilesWindow:showTileset(container)
@@ -60,7 +155,13 @@ function TilesWindow:showTileset(container)
 
       if tile then
         local tmp = GUI.TileInfo:new()
-        tmp:begin(false, tile.path, tile.quad, shared_info)
+        tmp:begin(self.onSelectAutotile, tile.path, tile.quad, shared_info)
+        tmp.userData = {
+          self = self,
+          animation = tile.animation,
+          row = row,
+          container = container
+        }
         row:addWidget(tmp)
       end
     end
