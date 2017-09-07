@@ -3,9 +3,14 @@ local FieldsWindow = GUI.Window:new(true, "FIELDS")
 
 function FieldsWindow.onLoadField(data)
   FieldManager:loadField(data.field)
+
+  data.self.editorOnLoadField(data.self.editor)
 end
 
-function FieldsWindow:begin()
+function FieldsWindow:begin(editor, onLoadField)
+  self.editor = editor
+  self.editorOnLoadField = onLoadField
+
   self.fieldTree = JSON.load("data/fields/fieldTree").root
 
   self.w = GUIConf.border*20
@@ -29,7 +34,7 @@ function FieldsWindow:begin()
     fieldButton = GUI.Button:new(fieldInfo.data.name)
     fieldButton:begin(self.onLoadField)
     fieldButton.fixedH = 36
-    fieldButton.userData = {field = fieldInfo.data.id}
+    fieldButton.userData = {field = fieldInfo.data.id, self = self}
 
     c3:addWidget(fieldButton)
   end

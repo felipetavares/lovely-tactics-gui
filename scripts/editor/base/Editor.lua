@@ -9,13 +9,13 @@ local CameraMovement = require("editor/base/CameraMovement")
 
 local Editor = {}
 
-local function getTileAt(field, x, y, z)
+function Editor:getTileAt(field, x, y, z)
   local ret = nil
 
-  for k, v in ipairs(field.terrainLayers[z]) do
-    if v ~= nil and v.grid[x] ~= nil then
-      ret = v.grid[x][y]
-    end
+  local layer = field.terrainLayers[z][self.paintLayer]
+
+  if layer ~= nil and layer.grid[x] ~= nil then
+    ret = layer.grid[x][y]
   end
 
   return ret
@@ -23,6 +23,14 @@ end
 
 function Editor:onSetBrush(brush)
   self.brush = brush
+end
+
+function Editor:onLoadField()
+  self.layersWindow:updateLayers()
+end
+
+function Editor:onSelectLayer(layer)
+  self.paintLayer = layer
 end
 
 function Editor:begin()
@@ -35,12 +43,14 @@ function Editor:begin()
   self.tilesWindow.x, self.tilesWindow.y = GUIConf.border, GUIConf.border
 
   self.fieldsWindow = FieldsWindow:new()
-  self.fieldsWindow:begin()
+  self.fieldsWindow:begin(self, self.onLoadField)
   self.fieldsWindow.x, self.fieldsWindow.y = GUIConf.border, self.tilesWindow.h+GUIConf.border*2
 
   self.layersWindow = LayersWindow:new()
-  self.layersWindow:begin()
+  self.layersWindow:begin(self)
   self.layersWindow.x, self.layersWindow.y = love.graphics:getWidth()-self.layersWindow.w-GUIConf.border, GUIConf.border
+
+  self.cursor = love.graphics.newImage("gui_images/hex-selector.png")
 end
 
 function Editor:resize(w, h)
@@ -52,21 +62,31 @@ end
 function Editor:mouseMove(x, y, mouseOverUI)
   CameraMovement:mouseMove(x, y, mouseOverUI)
 
-  if self.brush and love.mouse.isDown(1) and not love.keyboard.isDown("lctrl", "rctrl") then
-    local w, h = love.graphics:getDimensions()
+  local w, h = love.graphics:getDimensions()
 
-    -- Get the world coordinates
-    local wx, wy = FieldManager.renderer:screen2World(x, y)
-    -- Get the tile coordinates
-    local tx, ty, h = math.field.pixel2Tile(wx, wy, -wy)
-    -- Round
-    tx, ty = math.round(tx), math.round(ty)
+  -- Get the world coordinates
+  local wx, wy = FieldManager.renderer:screen2World(x, y)
+  -- Get the tile coordinates
+  local otx, oty, h = math.field.pixel2Tile(wx, wy, -wy)
+  -- Round
+  local tx, ty = math.round(otx), math.round(oty)
 
-    -- Get the tile
-    local tile = getTileAt(FieldManager.currentField, tx, ty, 0)
+  -- Get the tile
+  local tile = self:getTileAt(FieldManager.currentField, tx, ty, 0)
 
-    if tile ~= nil then
-      tile:setTerrain(-1)
+  if tile ~= nil then
+    -- Get the screen coords for the tile
+    local sx, sy = math.field.tile2Pixel(tile:coordinates())
+    sx, sy = FieldManager.renderer:world2Screen(sx, sy)
+
+    -- Move the cursor there
+    self.cursorPosition = {
+      x = sx,
+      y = sy
+    }
+
+    if self.paintLayer and self.brush and love.mouse.isDown(1) and not love.keyboard.isDown("lctrl", "rctrl") then
+      tile:setTerrain(self.brush.tile)
     end
   end
 end
@@ -77,6 +97,10 @@ end
 
 function Editor:draw()
   ScreenManager:draw()
+
+  if self.cursor ~= nil and self.cursorPosition ~= nil then
+    love.graphics.draw(self.cursor, self.cursorPosition.x, self.cursorPosition.y, nil, nil, nil, Config.grid.tileW, Config.grid.tileH)
+  end
 end
 
 function Editor:mouseDown(x, y, button)
