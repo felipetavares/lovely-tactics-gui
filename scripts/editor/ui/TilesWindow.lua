@@ -1,25 +1,27 @@
 local GUIConf = require("ui/base/GUIConf")
 local TilesWindow = GUI.Window:new(true, "TILES")
 
-function TilesWindow:loadTileList()
+function TilesWindow:loadTileList(query)
   local tile_list = {}
   local tw, th = 36, 22
 
   for i=0,#Database.terrains do
     local terrain = Database.terrains[i]
 
-    local image = Database.animations[terrain.image]
+    if query == nil or terrain.name:lower():find(query:lower()) then
+      local image = Database.animations[terrain.image]
 
-    table.insert(tile_list, {
-      path = "images/"..image.path,
-      quad = {
-        x = image.x,
-        y = image.y,
-        w = tw,
-        h = th
-      },
-      animation = image
-    })
+      table.insert(tile_list, {
+        path = "images/"..image.path,
+        quad = {
+          x = image.x,
+          y = image.y,
+          w = tw,
+          h = th
+        },
+        animation = image
+      })
+    end
   end
 
   return tile_list
@@ -136,10 +138,10 @@ function TilesWindow.onSelectAutotile(data)
   data.container:invalidate()
 end
 
-function TilesWindow:showTileset(container)
+function TilesWindow:showTileset(container, query)
   container.widgets = {}
 
-  local tile_list = self:loadTileList()
+  local tile_list = self:loadTileList(query)
   local row_size = 3
   local shared_info = {
     focused = nil
@@ -163,6 +165,7 @@ function TilesWindow:showTileset(container)
           container = container
         }
         row:addWidget(tmp)
+        tmp.fixedW = GUIConf.border*5
       end
     end
 
@@ -171,6 +174,10 @@ function TilesWindow:showTileset(container)
 
   container:invalidate()
   container.fullH = nil
+end
+
+function TilesWindow.searchTileset(data)
+  data.self:showTileset(data.container, data.text.text)
 end
 
 function TilesWindow:begin()
@@ -221,11 +228,17 @@ function TilesWindow:begin()
   s1.fixedW = 24
   s1:scrollContainer(c3)
 
-  b1 = GUI.Button:new()
-  b1:begin(false, "gui_images/magnifier.png", {x = 0, y = 0, w = 24, h = 24})
-  b1.fixedW = 36
   t1 = GUI.TextBox:new()
   t1:begin()
+
+  b1 = GUI.Button:new()
+  b1:begin(self.searchTileset, "gui_images/magnifier.png", {x = 0, y = 0, w = 24, h = 24})
+  b1.fixedW = 36
+  b1.userData = {
+    self = self,
+    container = c3,
+    text = t1
+  }
 
   c4:addWidget(t1)
   c4:addWidget(b1)
