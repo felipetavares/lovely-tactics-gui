@@ -44,7 +44,7 @@ end
 
 function love.draw ()
   love.graphics.setScissor(0,0,love.graphics:getWidth(),love.graphics:getHeight())
-  love.graphics.clear(128, 60, 100, 255)
+  love.graphics.clear(128, 60, 180)
 
   Editor:draw()
   GUI.render()

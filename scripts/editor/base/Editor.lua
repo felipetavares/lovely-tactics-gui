@@ -59,11 +59,7 @@ function Editor:resize(w, h)
   self.layersWindow.rootContainer:invalidate()
 end
 
-function Editor:mouseMove(x, y, mouseOverUI)
-  CameraMovement:mouseMove(x, y, mouseOverUI)
-
-  local w, h = love.graphics:getDimensions()
-
+function Editor:tileUnderMouse(x, y)
   -- Get the world coordinates
   local wx, wy = FieldManager.renderer:screen2World(x, y)
   -- Get the tile coordinates
@@ -73,6 +69,18 @@ function Editor:mouseMove(x, y, mouseOverUI)
 
   -- Get the tile
   local tile = self:getTileAt(FieldManager.currentField, tx, ty, 0)
+
+  return tile
+end
+
+function Editor:mouseMove(x, y, mouseOverUI)
+  CameraMovement:mouseMove(x, y, mouseOverUI)
+
+  local tile = self:tileUnderMouse(x, y)
+
+  self.cursorPosition = nil
+
+  love.mouse.setVisible(not tile or mouseOverUI)
 
   if tile ~= nil then
     -- Get the screen coords for the tile
@@ -105,6 +113,14 @@ end
 
 function Editor:mouseDown(x, y, button)
   CameraMovement:mouseDown(x, y, button)
+
+  local tile = self:tileUnderMouse(x, y)
+
+  if tile ~= nil then
+    if self.paintLayer and self.brush and love.mouse.isDown(1) and not love.keyboard.isDown("lctrl", "rctrl") then
+      tile:setTerrain(self.brush.tile)
+    end
+  end
 end
 
 function Editor:mouseUp()
