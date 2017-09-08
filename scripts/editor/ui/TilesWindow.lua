@@ -220,7 +220,7 @@ function TilesWindow:begin(editor, setBrushCallback)
   self.currentTileset = 1
 
   self.w = GUIConf.border*20
-  self.h = GUIConf.border*40
+  self.h = GUIConf.border*30
 
   -- Containers
   local c1, c2, c3, c4, c5

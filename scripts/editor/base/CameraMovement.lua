@@ -7,7 +7,7 @@ function CameraMovement:mouseUp()
 end
 
 function CameraMovement:mouseDown(x, y, button)
-  if button == 1 then
+  if button == 1 or button == 3 then
     local w, h = love.graphics:getWidth(), love.graphics:getHeight()
 
     -- Camera position in world coordinates
@@ -21,10 +21,9 @@ function CameraMovement:mouseDown(x, y, button)
 end
 
 function CameraMovement:mouseMove(x, y, overUI)
-  if love.mouse.isDown(1) and
-     not overUI and
+  if not overUI and
      initialClickPosition and
-     love.keyboard.isDown("lctrl", "rctrl") then
+     (love.mouse.isDown(1) and love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) then
     local w = love.graphics:getWidth()
     local h = love.graphics:getHeight()
 

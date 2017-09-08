@@ -4,6 +4,7 @@ local TilesWindow = require("editor/ui/TilesWindow")
 local FieldsWindow = require("editor/ui/FieldsWindow")
 local LayersWindow = require("editor/ui/LayersWindow")
 local MenuWindow = require("editor/ui/MenuWindow")
+local ToolsWindow = require("editor/ui/ToolsWindow")
 
 local CameraMovement = require("editor/base/CameraMovement")
 
@@ -33,6 +34,10 @@ function Editor:onSelectLayer(layer)
   self.paintLayer = layer
 end
 
+function Editor:onChangeTool(tool)
+  self.tool = tool
+end
+
 function Editor:begin()
   -- Load the map
   FieldManager:loadField(0)
@@ -48,14 +53,20 @@ function Editor:begin()
 
   self.layersWindow = LayersWindow:new()
   self.layersWindow:begin(self)
-  self.layersWindow.x, self.layersWindow.y = love.graphics:getWidth()-self.layersWindow.w-GUIConf.border, GUIConf.border
+  self.layersWindow.x, self.layersWindow.y = love.graphics:getWidth()- self.layersWindow.w-GUIConf.border, GUIConf.border
+
+  self.toolsWindow = ToolsWindow:new()
+  self.toolsWindow:begin(self)
+  self.toolsWindow.x, self.toolsWindow.y = love.graphics:getWidth()-self.toolsWindow.w-GUIConf.border, self.layersWindow.h+GUIConf.border*2
 
   self.cursor = love.graphics.newImage("gui_images/hex-selector.png")
 end
 
 function Editor:resize(w, h)
   self.layersWindow.x, self.layersWindow.y = w-self.layersWindow.w-GUIConf.border, GUIConf.border
+  self.toolsWindow.x, self.toolsWindow.y = love.graphics:getWidth()-self.toolsWindow.w-GUIConf.border, self.layersWindow.h+GUIConf.border*2
 
+  self.toolsWindow.rootContainer:invalidate()
   self.layersWindow.rootContainer:invalidate()
 end
 
@@ -82,7 +93,7 @@ function Editor:mouseMove(x, y, mouseOverUI)
 
   love.mouse.setVisible(not tile or mouseOverUI)
 
-  if tile ~= nil then
+  if tile ~= nil and not mouseOverUI then
     -- Get the screen coords for the tile
     local sx, sy = math.field.tile2Pixel(tile:coordinates())
     sx, sy = FieldManager.renderer:world2Screen(sx, sy)
@@ -93,7 +104,15 @@ function Editor:mouseMove(x, y, mouseOverUI)
       y = sy
     }
 
-    if self.paintLayer and self.brush and love.mouse.isDown(1) and not love.keyboard.isDown("lctrl", "rctrl") then
+    self:paint(tile)
+  end
+end
+
+function Editor:paint(tile)
+  if self.paintLayer and self.brush and love.mouse.isDown(1) and not (love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) and self.tool ~= nil then
+    if self.tool.name == "eraser" then
+      tile:setTerrain(-1)
+    else
       tile:setTerrain(self.brush.tile)
     end
   end
@@ -117,9 +136,7 @@ function Editor:mouseDown(x, y, button)
   local tile = self:tileUnderMouse(x, y)
 
   if tile ~= nil then
-    if self.paintLayer and self.brush and love.mouse.isDown(1) and not love.keyboard.isDown("lctrl", "rctrl") then
-      tile:setTerrain(self.brush.tile)
-    end
+    self:paint(tile)
   end
 end
 

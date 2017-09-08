@@ -1,42 +1,42 @@
 local GUIConf = require("ui/base/GUIConf")
 local ToolsWindow = GUI.Window:new(true, "")
 
-function ToolsWindow:begin()
-  self.w = GUIConf.border*20
+function ToolsWindow.onChangeTool(data)
+  data.self.editor:onChangeTool(data.tool)
+end
+
+function ToolsWindow:begin(editor)
+  self.editor = editor
+
+  self.w = GUIConf.border*5
   self.h = GUIConf.border*15
 
   -- Containers
   local c1, c2, c3
-  -- Scroll bars
-  local s1
 
   c1 = GUI.VContainer:new()
   c1:begin()
-  c2 = GUI.HContainer:new()
-  c2:begin(true)
-  c3 = GUI.VContainer:new()
-  c3:begin(false, true)
 
-  for i, fieldInfo in ipairs(self.fieldTree.children) do
-    local fieldButton
+  local shared_info = {}
 
-    fieldButton = GUI.Button:new(fieldInfo.data.name)
-    fieldButton:begin(self.onLoadField)
-    fieldButton.fixedH = 36
-    fieldButton.userData = {field = fieldInfo.data.id}
+  local tools = {
+    {
+      image = "gui_images/eraser.png",
+      name = "eraser"
+    },
+    {
+      image = "gui_images/pencil.png",
+      name = "pencil"
+    }
+  }
 
-    c3:addWidget(fieldButton)
+  for k, v in ipairs(tools) do
+    local tool = GUI.TileInfo:new()
+    tool:begin(self.onChangeTool, v.image, {x=0,y=0,w=24,h=24}, shared_info)
+    tool.userData = {self = self, tool = v}
+
+    c1:addWidget(tool)
   end
-
-  s1 = GUI.ScrollBar:new()
-  s1:begin("vertical")
-  s1:scrollContainer(c3)
-  s1.fixedW = 24
-
-  c2:addWidget(c3)
-  c2:addWidget(s1)
-
-  c1:addWidget(c2)
 
   self:setRootContainer(c1)
 

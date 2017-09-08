@@ -4,6 +4,9 @@ local FieldsWindow = GUI.Window:new(true, "FIELDS")
 function FieldsWindow.onLoadField(data)
   FieldManager:loadField(data.field)
 
+  local x, y = math.field.pixelCenter(FieldManager.currentField)
+  FieldManager.renderer:moveTo(x, y)
+
   data.self.editorOnLoadField(data.self.editor)
 end
 
