@@ -197,6 +197,9 @@ function TilesWindow:showTileset(container, query)
           row = row,
           container = container
         }
+
+        tmp:click()
+
         row:addWidget(tmp)
         tmp.fixedW = GUIConf.border*5
       end
@@ -241,21 +244,23 @@ function TilesWindow:begin(editor, setBrushCallback)
   c4 = GUI.HContainer:new()
   c4:begin(true)
   c4.fixedH = 36
-  c5 = GUI.HContainer:new()
-  c5:begin(true)
-  c5.fixedH = 36
 
-  for i=1,4 do
-    local tab = GUI.Button:new("#"..tostring(i))
-    tab:begin(self.switchToTileset)
-    tab.userData = {
-      self = self,
-      n = i,
-      container = c3
-    }
+  -- Tileset tabs
+  --c5 = GUI.HContainer:new()
+  --c5:begin(true)
+  --c5.fixedH = 36
 
-    c5:addWidget(tab)
-  end
+  --for i=1,4 do
+  --  local tab = GUI.Button:new("#"..tostring(i))
+  --  tab:begin(self.switchToTileset)
+  --  tab.userData = {
+  --    self = self,
+  --    n = i,
+  --    container = c3
+  --  }
+
+  --   c5:addWidget(tab)
+  -- end
 
   self:showTileset(c3)
 
@@ -282,7 +287,8 @@ function TilesWindow:begin(editor, setBrushCallback)
   c2:addWidget(c3)
   c2:addWidget(s1)
 
-  c1:addWidget(c5)
+  -- Tileset tabs
+  --c1:addWidget(c5)
   c1:addWidget(c2)
   c1:addWidget(c4)
 

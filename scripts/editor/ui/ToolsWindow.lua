@@ -35,6 +35,8 @@ function ToolsWindow:begin(editor)
     tool:begin(self.onChangeTool, v.image, {x=0,y=0,w=24,h=24}, shared_info)
     tool.userData = {self = self, tool = v}
 
+    tool:click()
+
     c1:addWidget(tool)
   end
 

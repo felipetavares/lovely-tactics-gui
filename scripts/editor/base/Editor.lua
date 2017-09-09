@@ -109,11 +109,16 @@ function Editor:mouseMove(x, y, mouseOverUI)
 end
 
 function Editor:paint(tile)
-  if self.paintLayer and self.brush and love.mouse.isDown(1) and not (love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) and self.tool ~= nil then
+  if self.paintLayer and
+     love.mouse.isDown(1) and
+     not (love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) and
+     self.tool ~= nil then
     if self.tool.name == "eraser" then
       tile:setTerrain(-1)
-    else
-      tile:setTerrain(self.brush.tile)
+    elseif self.tool.name == "pencil" then
+      if self.brush ~= nil then
+        tile:setTerrain(self.brush.tile)
+      end
     end
   end
 end
@@ -126,7 +131,10 @@ function Editor:draw()
   ScreenManager:draw()
 
   if self.cursor ~= nil and self.cursorPosition ~= nil then
-    love.graphics.draw(self.cursor, self.cursorPosition.x, self.cursorPosition.y, nil, nil, nil, Config.grid.tileW, Config.grid.tileH)
+    local x, y = self.cursorPosition.x, self.cursorPosition.y
+    local w, h = Config.grid.tileW, Config.grid.tileH
+
+    love.graphics.draw(self.cursor, x, y, nil, nil, nil, w, h)
   end
 end
 
