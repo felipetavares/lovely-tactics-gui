@@ -71,10 +71,12 @@ end
 
 function love.keypressed(key, isrepeat)
   GUI.keyDown(key, isrepeat)
+  Editor:keyDown(key)
 end
 
 function love.keyreleased(key)
   GUI.keyUp(key)
+  Editor:keyUp(key)
 end
 
 function love.textinput(unicode)

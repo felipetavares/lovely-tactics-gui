@@ -2,28 +2,40 @@ local CameraMovement = {}
 
 local initialClickPosition = nil
 
+function CameraMovement:setInitialClick(x, y)
+  local w, h = love.graphics:getWidth(), love.graphics:getHeight()
+
+  -- Camera position in world coordinates
+  local wx, wy = FieldManager.renderer:screen2World(w, h)
+
+  initialClickPosition = {
+    x = x, y = y,
+    camX = wx, camY = wy,
+  }
+end
+
 function CameraMovement:mouseUp()
   initialClickPosition = nil
 end
 
 function CameraMovement:mouseDown(x, y, button)
   if button == 1 or button == 3 then
-    local w, h = love.graphics:getWidth(), love.graphics:getHeight()
+    self:setInitialClick(x, y)
+  end
+end
 
-    -- Camera position in world coordinates
-    local wx, wy = FieldManager.renderer:screen2World(w, h)
-
-    initialClickPosition = {
-      x = x, y = y,
-      camX = wx, camY = wy,
-    }
+function CameraMovement:keyDown(key)
+  if key == "space" then
+    self:setInitialClick(love.mouse:getPosition())
   end
 end
 
 function CameraMovement:mouseMove(x, y, overUI)
   if not overUI and
      initialClickPosition and
-     (love.mouse.isDown(1) and love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) then
+     ((love.mouse.isDown(1) and love.keyboard.isDown("lctrl", "rctrl")) or
+       love.mouse.isDown(3) or
+       love.keyboard.isDown("space")) then
     local w = love.graphics:getWidth()
     local h = love.graphics:getHeight()
 

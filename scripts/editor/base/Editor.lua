@@ -7,6 +7,7 @@ local MenuWindow = require("editor/ui/MenuWindow")
 local ToolsWindow = require("editor/ui/ToolsWindow")
 
 local CameraMovement = require("editor/base/CameraMovement")
+local History = require("editor/base/History")
 
 local Editor = {}
 
@@ -41,6 +42,9 @@ end
 function Editor:begin()
   -- Load the map
   FieldManager:loadField(0)
+
+  -- Create the history
+  self.history = History:new()
 
   -- Create the UI
   self.tilesWindow = TilesWindow:new()
@@ -114,10 +118,16 @@ function Editor:paint(tile)
      not (love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) and
      self.tool ~= nil then
     if self.tool.name == "eraser" then
-      tile:setTerrain(-1)
+      if tile.data ~= nil then
+        self.history:commit(History.makeAction("eraser", tile))
+        tile:setTerrain(-1)
+      end
     elseif self.tool.name == "pencil" then
       if self.brush ~= nil then
-        tile:setTerrain(self.brush.tile)
+        if not tile.data or tile.data.id ~= self.brush.tile then
+          self.history:commit(History.makeAction("pencil", tile, self.brush.tile))
+          tile:setTerrain(self.brush.tile)
+        end
       end
     end
   end
@@ -150,6 +160,22 @@ end
 
 function Editor:mouseUp()
   CameraMovement:mouseUp()
+end
+
+function Editor:keyUp(key)
+  if love.keyboard.isDown("lctrl", "rctrl") then
+    -- Undo
+    if key == "z" then
+      self.history:undo()
+    -- Redo
+    elseif key == "y" then
+      self.history:redo()
+    end
+  end
+end
+
+function Editor:keyDown(key)
+  CameraMovement:keyDown(key)
 end
 
 return Editor
