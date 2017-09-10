@@ -25,6 +25,10 @@ end
 
 function Editor:onSetBrush(brush)
   self.brush = brush
+
+  local notification = GUI.Notification:new("Using brush "..self.brush.name)
+
+  GUI.NotificationManager.addNotification(notification)
 end
 
 function Editor:onLoadField()
@@ -33,10 +37,18 @@ end
 
 function Editor:onSelectLayer(layer)
   self.paintLayer = layer
+
+  local notification = GUI.Notification:new("Using layer #"..tostring(layer))
+
+  GUI.NotificationManager.addNotification(notification)
 end
 
 function Editor:onChangeTool(tool)
   self.tool = tool
+
+  local notification = GUI.Notification:new("Using "..tool.name)
+
+  GUI.NotificationManager.addNotification(notification)
 end
 
 function Editor:begin()
@@ -64,6 +76,7 @@ function Editor:begin()
   self.toolsWindow.x, self.toolsWindow.y = love.graphics:getWidth()-self.toolsWindow.w-GUIConf.border, self.layersWindow.h+GUIConf.border*2
 
   self.cursor = love.graphics.newImage("gui_images/hex-selector.png")
+  self.toolCursor = love.graphics.newImage("gui_images/cursor-pencil.png")
 end
 
 function Editor:resize(w, h)
@@ -141,9 +154,11 @@ function Editor:draw()
   ScreenManager:draw()
 
   if self.cursor ~= nil and self.cursorPosition ~= nil then
+    local mx, my = love.mouse:getPosition()
     local x, y = self.cursorPosition.x, self.cursorPosition.y
     local w, h = Config.grid.tileW, Config.grid.tileH
 
+    love.graphics.draw(self.toolCursor, mx, my-32)
     love.graphics.draw(self.cursor, x, y, nil, nil, nil, w, h)
   end
 end

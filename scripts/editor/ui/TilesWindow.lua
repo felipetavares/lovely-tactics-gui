@@ -134,7 +134,8 @@ end
 
 function TilesWindow.onSelectAutotile(data)
   data.self.setBrushCallback(data.self.editor, {
-    tile = data.terrainID
+    tile = data.terrainID,
+    name = data.terrain.name
   })
 
   local preview = GUI.VContainer:new()

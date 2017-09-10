@@ -105,7 +105,7 @@ function History:applyUndo(action)
 
   action.tile:setTerrain(terrainID)
 
-  self:messageUser("Applied action "..action.name)
+  self:messageUser("Undo "..action.name)
 end
 
 function History:applyRedo(action)
@@ -117,12 +117,13 @@ function History:applyRedo(action)
 
   action.tile:setTerrain(terrainID)
 
-  self:messageUser("Applied action "..action.name)
+  self:messageUser("Redo "..action.name)
 end
 
 function History:messageUser(message)
-  -- TODO: Add GUI
-  --print(message)
+  local notification = GUI.Notification:new(message)
+
+  GUI.NotificationManager.addNotification(notification)
 end
 
 return History

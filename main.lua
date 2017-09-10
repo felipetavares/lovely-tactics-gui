@@ -62,6 +62,7 @@ function love.resize(w, h)
   ScreenManager.height = h
   FieldManager.renderer:resizeCanvas()
   Editor:resize(w, h)
+  GUI.NotificationManager.resize(w, h)
 end
 
 function love.mousereleased(x, y, button)

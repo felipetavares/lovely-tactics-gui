@@ -10,6 +10,9 @@ local ScrollBar = require("ui/widgets/ScrollBar")
 local VContainer = require("ui/widgets/VContainer")
 local HContainer = require("ui/widgets/HContainer")
 
+local Notification = require("ui/base/Notification")
+local NotificationManager = require("ui/base/NotificationManager")
+
 local focusedWidget = nil
 
 local GUI = {
@@ -22,129 +25,136 @@ local GUI = {
   TileThumbnail = TileThumbnail,
   ScrollBar = ScrollBar,
   VContainer = VContainer,
-  HContainer = HContainer
+  HContainer = HContainer,
+  NotificationManager = NotificationManager,
+  Notification = Notification
 }
 
 local windows = {}
 
 function GUI.addWindow (window)
-	table.insert (windows, 1, window)
+  table.insert (windows, 1, window)
 
-	focusedWindow = window
+  focusedWindow = window
 
-	return true
+  return true
 end
 
 function GUI.render ()
-	local w
+  local w
 
-	for w=#windows, 1, -1 do
-		if windows[w].isVisible then
-			windows[w]:render()
-		end
-	end
+  for w=#windows, 1, -1 do
+    if windows[w].isVisible then
+      windows[w]:render()
+    end
+  end
+
+  iScissor:setScissor(0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+  GUI.NotificationManager.render()
 end
 
 function GUI.update ()
-	local w
+  local w
 
-	for w=1, #windows do
-		if windows[w] then
-			if windows[w].isVisible then
-				windows[w]:update()
-			end
+  for w=1, #windows do
+    if windows[w] then
+      if windows[w].isVisible then
+        windows[w]:update()
+      end
 
-			if windows[w].closed then
-				table.remove (windows, w)
-				w = w-1
-			end
-		end
-	end
+      if windows[w].closed then
+        table.remove (windows, w)
+        w = w-1
+      end
+    end
+  end
+
+  GUI.NotificationManager.update()
 end
 
 function GUI.mouseDown (x, y, button)
-	local w
+  local w
 
-	for w=1, #windows do
-		if windows[w]:mouseDown(x, y, button) then
-			if windows[w] ~= focusedWindow then
-				GUI.bringUp(w)
-			end
-			break
-		end
-	end
+  for w=1, #windows do
+    if windows[w]:mouseDown(x, y, button) then
+      if windows[w] ~= focusedWindow then
+        GUI.bringUp(w)
+      end
+      break
+    end
+  end
 end
 
 function GUI.mouseUp (x, y, button)
-	local w
+  local w
 
-	for w=1, #windows do
-		if windows[w]:mouseUp(x, y, button) then
-			if windows[w] ~= focusedWindow then
-				GUI.bringUp(w)
-			end
-			break
-		end
-	end
+  for w=1, #windows do
+    if windows[w]:mouseUp(x, y, button) then
+      if windows[w] ~= focusedWindow then
+        GUI.bringUp(w)
+      end
+      break
+    end
+  end
 end
 
 function GUI.mouseMove (x, y)
-	local w
+  local w
 
-	for w=1, #windows do
-		if windows[w]:mouseMove(x, y) then
-			--amiga-like behaviour
-			--if windows[w] ~= focusedWindow then
-			--	GUI.bringUp(w)
-			--end
-			return true
-		end
-	end
+  for w=1, #windows do
+    if windows[w]:mouseMove(x, y) then
+      --amiga-like behaviour
+      --if windows[w] ~= focusedWindow then
+      --	GUI.bringUp(w)
+      --end
+      return true
+    end
+  end
 
-	return false
+  return false
 end
 
 function GUI.bringUp (w)
-	local window = windows[w]
+  local window = windows[w]
 
-	table.remove(windows,w)
-	table.insert(windows, 1, window)
+  table.remove(windows,w)
+  table.insert(windows, 1, window)
 
-	focusedWindow = window
+  focusedWindow = window
 end
 
 function GUI.setFocus (widget)
-	if focusedWidget then
-		focusedWidget:unfocus()
-	end
+  if focusedWidget then
+    focusedWidget:unfocus()
+  end
 
-	if widget.text then
-		widget:focus()
+  if widget.text then
+    widget:focus()
 
-		focusedWidget = widget
-	end
+    focusedWidget = widget
+  end
 end
 
 function GUI.keyDown (key, isrepeat)
-	if focusedWidget then
-		focusedWidget:keyDown (key, isrepeat)
-	end
+  if focusedWidget then
+    focusedWidget:keyDown (key, isrepeat)
+  end
 end
 
 function GUI.keyUp (key)
-	if focusedWidget then
-		focusedWidget:keyUp (key)
-	end
+  if focusedWidget then
+    focusedWidget:keyUp (key)
+  end
 end
 
 function GUI.input (unicode)
-	if focusedWidget then
-		focusedWidget:input (unicode)
-	end
+  if focusedWidget then
+    focusedWidget:input (unicode)
+  end
 end
 
 function GUI.getFocused ()
-	return focusedWidget
+  return focusedWidget
 end
 
 return GUI
