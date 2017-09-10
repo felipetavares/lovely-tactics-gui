@@ -76,7 +76,6 @@ function Editor:begin()
   self.toolsWindow.x, self.toolsWindow.y = love.graphics:getWidth()-self.toolsWindow.w-GUIConf.border, self.layersWindow.h+GUIConf.border*2
 
   self.cursor = love.graphics.newImage("gui_images/hex-selector.png")
-  self.toolCursor = love.graphics.newImage("gui_images/cursor-pencil.png")
 end
 
 function Editor:resize(w, h)
@@ -158,7 +157,7 @@ function Editor:draw()
     local x, y = self.cursorPosition.x, self.cursorPosition.y
     local w, h = Config.grid.tileW, Config.grid.tileH
 
-    love.graphics.draw(self.toolCursor, mx, my-32)
+    love.graphics.draw(self.tool.cursor, mx, my-32)
     love.graphics.draw(self.cursor, x, y, nil, nil, nil, w, h)
   end
 end

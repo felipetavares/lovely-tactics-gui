@@ -22,10 +22,12 @@ function ToolsWindow:begin(editor)
   local tools = {
     {
       image = "gui_images/eraser.png",
+      cursor = love.graphics.newImage("gui_images/cursor-eraser.png"),
       name = "eraser"
     },
     {
       image = "gui_images/pencil.png",
+      cursor = love.graphics.newImage("gui_images/cursor-pencil.png"),
       name = "pencil"
     }
   }

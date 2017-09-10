@@ -78,6 +78,8 @@ function History:undo()
 
     -- Set the editor action to the fetched action
     self:applyUndo(action)
+  else
+    self:messageUser("Already at the oldest", "alert")
   end
 end
 
@@ -92,6 +94,8 @@ function History:redo()
 
     -- Apply it
     self:applyRedo(action)
+  else
+    self:messageUser("Already at the latest", "alert")
   end
 end
 
@@ -105,7 +109,7 @@ function History:applyUndo(action)
 
   action.tile:setTerrain(terrainID)
 
-  self:messageUser("Undo "..action.name)
+  self:messageUser("Undid "..action.humanName)
 end
 
 function History:applyRedo(action)
@@ -117,11 +121,11 @@ function History:applyRedo(action)
 
   action.tile:setTerrain(terrainID)
 
-  self:messageUser("Redo "..action.name)
+  self:messageUser("Redid "..action.humanName)
 end
 
-function History:messageUser(message)
-  local notification = GUI.Notification:new(message)
+function History:messageUser(message, type)
+  local notification = GUI.Notification:new(message, type)
 
   GUI.NotificationManager.addNotification(notification)
 end
