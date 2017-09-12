@@ -79,7 +79,7 @@ function History:undo()
     -- Set the editor action to the fetched action
     self:applyUndo(action)
   else
-    self:messageUser("Already at the oldest", "alert")
+    self:messageUser("Oldest change", "alert")
   end
 end
 
@@ -95,7 +95,7 @@ function History:redo()
     -- Apply it
     self:applyRedo(action)
   else
-    self:messageUser("Already at the latest", "alert")
+    self:messageUser("Latest change", "alert")
   end
 end
 

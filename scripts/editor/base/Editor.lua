@@ -23,6 +23,21 @@ function Editor:getTileAt(field, x, y, z)
   return ret
 end
 
+function Editor:toggleHideWindows()
+  -- Hide or show all windows (notifications are not windows)
+  GUI.setVisible(not self.tilesWindow.isVisible)
+
+  local message = "UI [off]"
+
+  if self.tilesWindow.isVisible then
+    message = "UI [on]"
+  end
+
+  local notification = GUI.Notification:new(message)
+
+  GUI.NotificationManager.addNotification(notification)
+end
+
 function Editor:onSetBrush(brush)
   self.brush = brush
 
@@ -157,8 +172,8 @@ function Editor:draw()
     local x, y = self.cursorPosition.x, self.cursorPosition.y
     local w, h = Config.grid.tileW, Config.grid.tileH
 
-    love.graphics.draw(self.tool.cursor, mx, my-32)
     love.graphics.draw(self.cursor, x, y, nil, nil, nil, w, h)
+    love.graphics.draw(self.tool.cursor, mx, my-32)
   end
 end
 
@@ -177,6 +192,11 @@ function Editor:mouseUp()
 end
 
 function Editor:keyUp(key)
+end
+
+function Editor:keyDown(key)
+  CameraMovement:keyDown(key)
+
   if love.keyboard.isDown("lctrl", "rctrl") then
     -- Undo
     if key == "z" then
@@ -185,11 +205,9 @@ function Editor:keyUp(key)
     elseif key == "y" then
       self.history:redo()
     end
+  elseif love.keyboard.isDown("tab") then
+    self:toggleHideWindows()
   end
-end
-
-function Editor:keyDown(key)
-  CameraMovement:keyDown(key)
 end
 
 return Editor

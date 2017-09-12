@@ -32,6 +32,12 @@ local GUI = {
 
 local windows = {}
 
+function GUI.setVisible(visible)
+  for _, window in ipairs(windows) do
+    window.isVisible = visible
+  end
+end
+
 function GUI.addWindow (window)
   table.insert (windows, 1, window)
 
