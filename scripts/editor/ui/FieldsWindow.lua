@@ -1,4 +1,6 @@
 local GUIConf = require("ui/base/GUIConf")
+local NewFieldWindow = require("editor/ui/NewFieldWindow")
+
 local FieldsWindow = GUI.Window:new(true, "FIELDS")
 
 function FieldsWindow.onLoadField(data)
@@ -8,6 +10,11 @@ function FieldsWindow.onLoadField(data)
   FieldManager.renderer:moveTo(x, y)
 
   data.self.editorOnLoadField(data.self.editor)
+end
+
+function FieldsWindow.onNewField(data)
+  local newFieldWindow = NewFieldWindow:new()
+  newFieldWindow:begin()
 end
 
 function FieldsWindow:begin(editor, onLoadField)
@@ -37,8 +44,10 @@ function FieldsWindow:begin(editor, onLoadField)
   c4.fixedH = GUIConf.border*3
 
   b1 = GUI.Button:new()
-  b1:begin(nil, "gui_images/plus.png", {x=0,y=0,w=24,h=24})
-  b1.userData = nil
+  b1:begin(self.onNewField, "gui_images/plus.png", {x=0,y=0,w=24,h=24})
+  b1.userData = {
+    self = self
+  }
   b1.fixedW = GUIConf.border*3
 
   b2 = GUI.Button:new()

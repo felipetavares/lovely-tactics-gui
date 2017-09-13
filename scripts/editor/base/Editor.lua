@@ -177,12 +177,12 @@ function Editor:draw()
   end
 end
 
-function Editor:mouseDown(x, y, button)
+function Editor:mouseDown(x, y, button, mouseOverUI)
   CameraMovement:mouseDown(x, y, button)
 
   local tile = self:tileUnderMouse(x, y)
 
-  if tile ~= nil then
+  if tile ~= nil and not mouseOverUI then
     self:paint(tile)
   end
 end

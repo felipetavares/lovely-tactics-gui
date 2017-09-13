@@ -53,8 +53,13 @@ end
 -- Input
 
 function love.mousepressed(x, y, button)
-  GUI.mouseDown(x, y, button)
-  Editor:mouseDown(x, y, button)
+  local mouseOverUI = true
+
+  if GUI.mouseDown(x, y, button) then
+    mouseOverUI = false
+  end
+
+  Editor:mouseDown(x, y, button, mouseOverUI)
 end
 
 function love.resize(w, h)

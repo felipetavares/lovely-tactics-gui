@@ -5,8 +5,8 @@ local Window = {
 }
 
 function Window:center()
-  self.x = (love.graphics:getWidth()-self.w)/2
-  self.y = (love.graphics:getHeight()-self.h)/2
+  self.x = math.round((love.graphics:getWidth()-self.w)/2)
+  self.y = math.round((love.graphics:getHeight()-self.h)/2)
 end
 
 function Window:onBar (x, y)
@@ -56,7 +56,7 @@ end
 
 function Window:mouseUp (x, y, button)
 	if not self.isVisible then
-		return
+		return false
 	end
 
 	self.moving = false
@@ -73,6 +73,10 @@ function Window:mouseUp (x, y, button)
 end
 
 function Window:mouseMove (x, y)
+	if not self.isVisible then
+		return false
+	end
+
 	if self.moving then
 		self.x = x-self.barX
 		self.y = y-self.barY

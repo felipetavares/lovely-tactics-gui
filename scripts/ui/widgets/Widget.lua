@@ -4,7 +4,7 @@ local Skin = require("ui/base/Skin")
 local Widget = {
 }
 
-function Widget:new (name, noBg)
+function Widget:new (name, noBg, align)
 	local o = {
 		x = 0, y = 0, w = 0, h = 0,
 		container = nil,
@@ -15,6 +15,12 @@ function Widget:new (name, noBg)
 		name = ""
 	}
 	setmetatable (o, {__index=self})
+
+    if align then
+      o.align = align
+    else
+      o.align = 2
+    end
 
 	if name then
 		o.name = name
@@ -117,7 +123,17 @@ function Widget:render ()
       self.bg:draw(self.x+1, self.y+1, self.w-2, self.h-2)
     end
 
-	love.graphics.print (self.name, math.round(self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2), math.round(self.y+self.h/2+GUIConf.textOffset))
+    local x = 0
+
+    if self.align == 1 then
+      x = math.round(self.x+GUIConf.border/2)
+    elseif self.align == 2 then
+      x = math.round(self.x+self.w/2-love.graphics.getFont():getWidth(self.name)/2)
+    else
+      x = math.round(self.x+self.w-love.graphics.getFont():getWidth(self.name)-GUIConf.border/2)
+    end
+
+	love.graphics.print (self.name, x, math.round(self.y+self.h/2+GUIConf.textOffset))
 
 	iScissor:restore()
 end

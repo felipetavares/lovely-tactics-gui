@@ -86,9 +86,12 @@ function GUI.mouseDown (x, y, button)
       if windows[w] ~= focusedWindow then
         GUI.bringUp(w)
       end
-      break
+
+      return false
     end
   end
+
+  return true
 end
 
 function GUI.mouseUp (x, y, button)

@@ -10,7 +10,7 @@ function LayersWindow:updateLayers()
 
   self.layersContainer.widgets = {}
 
-  for i, _ in ipairs(FieldManager.currentField.terrainLayers[0]) do
+  for i, v in ipairs(FieldManager.currentField.terrainLayers[0]) do
     local layerInfo
 
     layerInfo = GUI.LayerInfo:new(tostring(i))
