@@ -6,6 +6,8 @@ local LayersWindow = require("editor/ui/LayersWindow")
 local MenuWindow = require("editor/ui/MenuWindow")
 local ToolsWindow = require("editor/ui/ToolsWindow")
 
+local Field = require("json/Field")
+
 local CameraMovement = require("editor/base/CameraMovement")
 local History = require("editor/base/History")
 
@@ -67,8 +69,17 @@ function Editor:onChangeTool(tool)
 end
 
 function Editor:begin()
-  -- Load the map
-  FieldManager:loadField(0)
+  -- Testing saving and loading maps
+  self.field = Field:new()
+
+  -- The last parameter is the type used to fill
+  self.field:addLayer("Sand", 0, 0, {}, 1)
+  self.field:addLayer("Grass", 0, 0, {}, 0)
+
+  -- Show the field
+  self.field:sync()
+
+  self.field:write("data/fields/test.json")
 
   -- Create the history
   self.history = History:new()
