@@ -4,17 +4,31 @@ GUI = require("ui/base/GUI")
 local Editor = require("editor/base/Editor")
 
 function begin()
-  --ScreenManager:init()
   Editor:begin()
 end
 
-function love.load ()
-  --love.window.setMode(800, 600, {fullscreen=false, resizable=true})
+function drawBackground()
+  local w, h = love.graphics:getDimensions()
+  local dw, dh = 128, 128
 
+  for y=0,h,dh do
+    for x=0,w,dw do
+      if ((x+y)/dw)%2 == 0 then
+        love.graphics.setColor(128, 60, 180, 255)
+      else
+        love.graphics.setColor(160, 90, 200, 255)
+      end
+
+      love.graphics.rectangle("fill", x, y, dw, dh)
+    end
+  end
+
+  love.graphics.setColor(255, 255, 255, 255)
+end
+
+function love.load ()
   -- Fast terminal out
   io.stdout:setvbuf("no")
-
-  love.window.setTitle ("Lovely Tactics Hex")
 
   -- Set a nice font
   love.graphics.setFont(love.graphics.newFont("fonts/FogSans.otf", 16))
@@ -43,8 +57,7 @@ function love.update ()
 end
 
 function love.draw ()
-  love.graphics.setScissor(0,0,love.graphics:getWidth(),love.graphics:getHeight())
-  love.graphics.clear(128, 60, 180)
+  drawBackground()
 
   Editor:draw()
   GUI.render()
