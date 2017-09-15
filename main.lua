@@ -4,12 +4,12 @@ GUI = require("ui/base/GUI")
 local Editor = require("editor/base/Editor")
 
 function begin()
-  ScreenManager:init()
+  --ScreenManager:init()
   Editor:begin()
 end
 
 function love.load ()
-  love.window.setMode(800, 600, {fullscreen=false, resizable=true})
+  --love.window.setMode(800, 600, {fullscreen=false, resizable=true})
 
   -- Fast terminal out
   io.stdout:setvbuf("no")
@@ -48,6 +48,8 @@ function love.draw ()
 
   Editor:draw()
   GUI.render()
+
+  love.graphics.print(tostring(love.timer.getFPS()), 0, 0)
 end
 
 -- Input
@@ -63,9 +65,9 @@ function love.mousepressed(x, y, button)
 end
 
 function love.resize(w, h)
-  ScreenManager.width = w
-  ScreenManager.height = h
-  FieldManager.renderer:resizeCanvas()
+  --ScreenManager.width = w
+  --ScreenManager.height = h
+  --FieldManager.renderer:resizeCanvas()
   Editor:resize(w, h)
   GUI.NotificationManager.resize(w, h)
 end

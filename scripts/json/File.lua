@@ -26,7 +26,7 @@ function File:new(filename)
     assert(o, "Could not load "..filename)
   end
 
-  setmetatable(o, {__index=self})
+  setmetatable(o, {__index=File})
 
   -- Data that shall not be written to disk
   o.nowrite = {
@@ -59,6 +59,8 @@ function File:write(filename)
 
   -- Close
   io.close(file)
+
+  self.nowrite = nowrite
 end
 
 function File:read(filename)

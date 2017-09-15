@@ -2,6 +2,8 @@ local GUIConf = require("ui/base/GUIConf")
 local LayersWindow = GUI.Window:new(true, "LAYERS")
 
 function LayersWindow.onSelectLayer(data)
+  data.self.currentLayer = data.layer
+
   data.self.editor:onSelectLayer(data.layer)
 end
 
@@ -18,12 +20,22 @@ function LayersWindow:updateLayers()
     layerInfo.fixedH = 36
     layerInfo.userData = {layer = i, self = self}
 
-    layerInfo:click()
+    if self.currentLayer == nil or self.currentLayer == i then
+      layerInfo:click()
+    end
 
     self.layersContainer:addWidget(layerInfo)
   end
 
   self.layersContainer:invalidate()
+end
+
+function LayersWindow.onNewLayer(data)
+  self = data.self
+
+  self.editor.field:addLayer("Water", 0, 0, {}, 2)
+
+  self:updateLayers()
 end
 
 function LayersWindow:begin(editor)
@@ -63,8 +75,8 @@ function LayersWindow:begin(editor)
   c2:addWidget(s1)
 
   b1 = GUI.Button:new()
-  b1:begin(nil, "gui_images/plus.png", {x=0,y=0,w=24,h=24})
-  b1.userData = nil
+  b1:begin(self.onNewLayer, "gui_images/plus.png", {x=0,y=0,w=24,h=24})
+  b1.userData = {self = self}
   b1.fixedW = GUIConf.border*3
 
   c3:addWidget(b1)

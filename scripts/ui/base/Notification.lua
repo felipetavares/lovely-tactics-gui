@@ -1,5 +1,3 @@
--- FIXME: UPDATE POSITIONS ON WINDOW RESIZING!
-
 local iv = require("ui/base/iv")
 local Skin = require("ui/base/Skin")
 local GUIConf = require("ui/base/GUIConf")

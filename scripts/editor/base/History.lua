@@ -1,25 +1,13 @@
--- From: https://gist.github.com/tylerneylon/81333721109155b2d244
-function copy3(obj, seen)
-  -- Handle non-tables and previously-seen tables.
-  if type(obj) ~= 'table' then return obj end
-  if seen and seen[obj] then return seen[obj] end
-
-  -- New table; mark it as seen an copy recursively.
-  local s = seen or {}
-  local res = setmetatable({}, getmetatable(obj))
-  s[obj] = res
-  for k, v in pairs(obj) do res[copy3(k, s)] = copy3(v, s) end
-  return res
-end
-
 local History = {}
 
-function History:new()
+function History:new(field)
   local o = {
     -- All the historic actions in the file
     stack = {},
     -- Pointer to the current position
-    pointer = 1
+    pointer = 1,
+    -- Reference to the render field
+    field = field
   }
 
   setmetatable(o, {__index=self})
@@ -32,26 +20,18 @@ function History.makeAction(name, tile, to)
     eraser = {
       name = "eraser",
       humanName = "Eraser tool",
-      tile = {},
-      tileCopy = {}
+      tile = {}
     },
     pencil = {
       name = "pencil",
       humanName = "Pencil tool",
-      tile = {},
-      to = {},
-      tileCopy = {}
+      tile = {}
     }
   }
 
   local action = ActionTable[name]
 
   action.tile = tile
-  action.tileCopy = copy3(tile)
-
-  if action.to ~= nil then
-    action.to = to
-  end
 
   return action
 end
@@ -101,25 +81,17 @@ end
 
 -- Applies a action to the editor
 function History:applyUndo(action)
-  local terrainID = -1
+  local tile = action.tile
 
-  if action.tileCopy.data ~= nil then
-    terrainID = action.tileCopy.data.id
-  end
-
-  action.tile:setTerrain(terrainID)
+  self.field:editAt(tile.layer, tile.x, tile.y, tile.old)
 
   self:messageUser("Undid "..action.humanName)
 end
 
 function History:applyRedo(action)
-  local terrainID = -1
+  local tile = action.tile
 
-  if action.to ~= nil then
-    terrainID = action.to
-  end
-
-  action.tile:setTerrain(terrainID)
+  self.field:editAt(tile.layer, tile.x, tile.y, tile.new)
 
   self:messageUser("Redid "..action.humanName)
 end

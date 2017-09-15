@@ -1,16 +1,21 @@
 local CameraMovement = {}
 
 local initialClickPosition = nil
+local field = nil
+local move = nil
+
+function CameraMovement:setField(value)
+  field = value
+end
 
 function CameraMovement:setInitialClick(x, y)
-  local w, h = love.graphics:getWidth(), love.graphics:getHeight()
+  -- Camera
+  local cam = field.nowrite.offset
 
-  -- Camera position in world coordinates
-  local wx, wy = FieldManager.renderer:screen2World(w, h)
-
+  -- Save the position
   initialClickPosition = {
     x = x, y = y,
-    camX = wx, camY = wy,
+    cx = cam.x, cy = cam.y,
   }
 end
 
@@ -27,29 +32,33 @@ end
 function CameraMovement:keyDown(key)
   if key == "space" then
     self:setInitialClick(love.mouse:getPosition())
+    move = true
+  end
+end
+
+function CameraMovement:keyUp(key)
+  if key == "space" then
+    move = nil
   end
 end
 
 function CameraMovement:mouseMove(x, y, overUI)
   if not overUI and
      initialClickPosition and
-     ((love.mouse.isDown(1) and love.keyboard.isDown("lctrl", "rctrl")) or
-       love.mouse.isDown(3) or
-       love.keyboard.isDown("space")) then
-    local w = love.graphics:getWidth()
-    local h = love.graphics:getHeight()
+     (move or
+     (love.mouse.isDown(1) and love.keyboard.isDown("lctrl", "rctrl")) or
+       love.mouse.isDown(3)) then
 
-    -- Movement in world space
-    -- Initial
-    local ix, iy = FieldManager.renderer:screen2World(initialClickPosition.x, initialClickPosition.y)
-    -- Final
-    local fx, fy = FieldManager.renderer:screen2World(x, y)
-    -- Delta
-    local dx, dy = fx-ix, fy-iy
+    local offset = field.nowrite.offset
 
-    -- New position in world space (old+delta)
-    local wx, wy = initialClickPosition.camX-dx, initialClickPosition.camY-dy
-    FieldManager.renderer:moveTo(wx, wy)
+    local newCam = {
+      x = initialClickPosition.cx+(x-initialClickPosition.x),
+      y = initialClickPosition.cy+(y-initialClickPosition.y)
+    }
+
+    offset.x, offset.y = newCam.x, newCam.y
+
+    field:updateNextFrame()
   end
 end
 

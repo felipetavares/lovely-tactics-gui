@@ -69,20 +69,24 @@ function Editor:onChangeTool(tool)
 end
 
 function Editor:begin()
+  FieldManager:init()
+
+  local fieldFile = "data/fields/test.json"
+
   -- Testing saving and loading maps
-  self.field = Field:new()
+  self.field = Field:new(fieldFile)
 
   -- The last parameter is the type used to fill
-  self.field:addLayer("Sand", 0, 0, {}, 1)
-  self.field:addLayer("Grass", 0, 0, {}, 0)
+  --self.field:addLayer("Sand", 0, 0, {}, 1)
+  --self.field:addLayer("Grass", 0, 0, {}, 0)
 
-  -- Show the field
-  self.field:sync()
+  self.field:write(fieldFile)
 
-  self.field:write("data/fields/test.json")
+  -- Let the camera use the field
+  CameraMovement:setField(self.field)
 
   -- Create the history
-  self.history = History:new()
+  self.history = History:new(self.field)
 
   -- Create the UI
   self.tilesWindow = TilesWindow:new()
@@ -114,57 +118,73 @@ end
 
 function Editor:tileUnderMouse(x, y)
   -- Get the world coordinates
-  local wx, wy = FieldManager.renderer:screen2World(x, y)
+  local wx, wy = self.field:screen2World(x, y)
   -- Get the tile coordinates
   local otx, oty, h = math.field.pixel2Tile(wx, wy, -wy)
   -- Round
   local tx, ty = math.round(otx), math.round(oty)
 
   -- Get the tile
-  local tile = self:getTileAt(FieldManager.currentField, tx, ty, 0)
 
-  return tile
+  return tx, ty
 end
 
 function Editor:mouseMove(x, y, mouseOverUI)
   CameraMovement:mouseMove(x, y, mouseOverUI)
 
-  local tile = self:tileUnderMouse(x, y)
+  local tx, ty = self:tileUnderMouse(x, y)
 
   self.cursorPosition = nil
 
-  love.mouse.setVisible(not tile or mouseOverUI)
+  love.mouse.setVisible(mouseOverUI)
 
-  if tile ~= nil and not mouseOverUI then
-    -- Get the screen coords for the tile
-    local sx, sy = math.field.tile2Pixel(tile:coordinates())
-    sx, sy = FieldManager.renderer:world2Screen(sx, sy)
+  if not mouseOverUI then
+    if self.paintLayer then
+      -- Get the screen coords for the tile
+      local sx, sy = math.field.tile2Pixel(tx, ty, self.field.layers[self.paintLayer].info.height)
+      sx, sy = self.field:world2Screen(sx, sy)
 
-    -- Move the cursor there
-    self.cursorPosition = {
-      x = sx,
-      y = sy
-    }
+      -- Move the cursor there
+      self.cursorPosition = {
+        x = sx,
+        y = sy
+      }
 
-    self:paint(tile)
+      -- Edit the tile if need be
+      self:paint(tx, ty)
+    end
   end
 end
 
-function Editor:paint(tile)
+function Editor:paint(tx, ty)
+  local value = self.field:getAt(self.paintLayer, tx, ty)
+
   if self.paintLayer and
      love.mouse.isDown(1) and
      not (love.keyboard.isDown("lctrl", "rctrl") or love.mouse.isDown(3)) and
      self.tool ~= nil then
     if self.tool.name == "eraser" then
-      if tile.data ~= nil then
-        self.history:commit(History.makeAction("eraser", tile))
-        tile:setTerrain(-1)
+      if value >= 0 then
+        self.history:commit(History.makeAction("eraser", {
+            layer = self.paintLayer,
+            x = tx,
+            y = ty,
+            old = value,
+            new = -1
+          }))
+        self.field:editAt(self.paintLayer, tx, ty, -1)
       end
     elseif self.tool.name == "pencil" then
       if self.brush ~= nil then
-        if not tile.data or tile.data.id ~= self.brush.tile then
-          self.history:commit(History.makeAction("pencil", tile, self.brush.tile))
-          tile:setTerrain(self.brush.tile)
+        if value ~= self.brush.tile and value ~= -2 then
+          self.history:commit(History.makeAction("pencil", {
+            layer = self.paintLayer,
+            x = tx,
+            y = ty,
+            old = value,
+            new = self.brush.tile
+          }))
+          self.field:editAt(self.paintLayer, tx, ty, self.brush.tile)
         end
       end
     end
@@ -172,11 +192,11 @@ function Editor:paint(tile)
 end
 
 function Editor:update(x, y)
-  FieldManager:update()
+  self.field:update()
 end
 
 function Editor:draw()
-  ScreenManager:draw()
+  self.field:render()
 
   if self.cursor ~= nil and self.cursorPosition ~= nil then
     local mx, my = love.mouse:getPosition()
@@ -191,11 +211,11 @@ end
 function Editor:mouseDown(x, y, button, mouseOverUI)
   CameraMovement:mouseDown(x, y, button)
 
-  local tile = self:tileUnderMouse(x, y)
+  -- local tile = self:tileUnderMouse(x, y)
 
-  if tile ~= nil and not mouseOverUI then
-    self:paint(tile)
-  end
+  -- if tile ~= nil and not mouseOverUI then
+  --   self:paint(tile)
+  -- end
 end
 
 function Editor:mouseUp()
@@ -203,6 +223,7 @@ function Editor:mouseUp()
 end
 
 function Editor:keyUp(key)
+  CameraMovement:keyUp(key)
 end
 
 function Editor:keyDown(key)

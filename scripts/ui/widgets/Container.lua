@@ -98,9 +98,11 @@ function Container:render ()
 
   for wid=1, #self.widgets do
     iScissor:save()
-    iScissor:combineScissor (self.x, self.y, self.w, self.h)
     if self.renderbg then
       self.bg:draw(self.x, self.y, self.w, self.h)
+      iScissor:combineScissor (self.x+2, self.y+2, self.w-4, self.h-4)
+    else
+      iScissor:combineScissor (self.x, self.y, self.w, self.h)
     end
     self.widgets[wid]:render()
     iScissor:restore()

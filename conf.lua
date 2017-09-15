@@ -11,6 +11,7 @@ function love.conf(t)
   --t.window.height = Config.screen.nativeHeight * Config.screen.heightScale
   t.window.fullscreentype = 'desktop'
   t.window.vsync = true
+  t.window.resizable = true
   t.modules.joystick = false
   t.modules.physics = false
 end
