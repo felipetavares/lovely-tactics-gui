@@ -71,7 +71,7 @@ end
 function Editor:begin()
   FieldManager:init()
 
-  local fieldFile = "data/fields/test.json"
+  local fieldFile = "data/fields/0.json"
 
   -- Testing saving and loading maps
   self.field = Field:new(fieldFile)

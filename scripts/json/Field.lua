@@ -95,7 +95,7 @@ end
 
 function Field:addToBatch(batch, quad, x, y)
   if batch:getCount() == batch:getBufferSize() then
-    batch:setBufferSize(batch:getBufferSize()*2)
+    --batch:setBufferSize(batch:getBufferSize()*2)
   end
 
   batch:add(quad, x, y)

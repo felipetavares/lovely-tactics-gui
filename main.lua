@@ -14,16 +14,16 @@ function drawBackground()
   for y=0,h,dh do
     for x=0,w,dw do
       if ((x+y)/dw)%2 == 0 then
-        love.graphics.setColor(128, 60, 180, 255)
+        love.graphics.setColor(128/255, 60/255, 180/255, 255/255)
       else
-        love.graphics.setColor(160, 90, 200, 255)
+        love.graphics.setColor(160/255, 90/255, 200/255, 255/255)
       end
 
       love.graphics.rectangle("fill", x, y, dw, dh)
     end
   end
 
-  love.graphics.setColor(255, 255, 255, 255)
+  love.graphics.setColor(1, 1, 1, 1)
 end
 
 function love.load ()
